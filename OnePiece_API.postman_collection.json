@@ -1,0 +1,178 @@
+{
+  "info": {
+    "name": "One Piece API",
+    "description": "API REST para personajes de One Piece",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Characters",
+      "item": [
+        {
+          "name": "Get All Characters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/characters",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "characters"]
+            }
+          }
+        },
+        {
+          "name": "Get Character By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/characters/luffy",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "characters", "luffy"]
+            }
+          }
+        },
+        {
+          "name": "Search Characters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/characters/search?name=luffy",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "characters", "search"],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "luffy"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Characters With Devil Fruit",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/characters/devil-fruits",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "characters", "devil-fruits"]
+            }
+          }
+        },
+        {
+          "name": "Create Character (Simple)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nami\",\n  \"alias\": \"Cat Burglar\",\n  \"species\": \"Human\",\n  \"role\": \"Navigator\",\n  \"firstAppearance\": \"Chapter 8\",\n  \"notes\": \"Best navigator in the world\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/characters",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "characters"]
+            }
+          }
+        },
+        {
+          "name": "Create Character (With Devil Fruit)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Portgas D. Ace\",\n  \"alias\": \"Fire Fist\",\n  \"species\": \"Human\",\n  \"role\": \"Commander\",\n  \"firstAppearance\": \"Chapter 154\",\n  \"devilFruit\": {\n    \"name\": \"Mera Mera no Mi\",\n    \"type\": \"Logia\",\n    \"description\": \"Fire control\"\n  },\n  \"hakiAbilities\": [\n    {\n      \"hakiType\": \"Armament\",\n      \"proficiency\": \"Advanced\",\n      \"awakened\": true\n    },\n    {\n      \"hakiType\": \"Conqueror\",\n      \"proficiency\": \"Advanced\",\n      \"awakened\": false\n    }\n  ],\n  \"notes\": \"Luffy's brother\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/characters",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "characters"]
+            }
+          }
+        },
+        {
+          "name": "Update Character",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Monkey D. Luffy\",\n  \"alias\": \"Straw Hat - Gear 5\",\n  \"species\": \"Human\",\n  \"role\": \"Captain\",\n  \"firstAppearance\": \"Chapter 1\",\n  \"devilFruit\": {\n    \"name\": \"Hito Hito no Mi, Model: Nika\",\n    \"type\": \"Mythical Zoan\",\n    \"description\": \"Grants the power of the Sun God Nika, allowing rubber-like abilities and Gear 5 awakening\"\n  },\n  \"hakiAbilities\": [\n    {\n      \"hakiType\": \"Conqueror\",\n      \"proficiency\": \"Master\",\n      \"awakened\": true,\n      \"notes\": \"Can coat attacks with Conqueror's Haki\"\n    },\n    {\n      \"hakiType\": \"Armament\",\n      \"proficiency\": \"Advanced\",\n      \"awakened\": true\n    },\n    {\n      \"hakiType\": \"Observation\",\n      \"proficiency\": \"Advanced\",\n      \"awakened\": false\n    }\n  ],\n  \"abilities\": [\n    {\n      \"type\": \"Gear 5\",\n      \"notes\": \"Highest form of Devil Fruit awakening\"\n    },\n    {\n      \"type\": \"Gear 4 - Boundman\",\n      \"notes\": \"Combines Haki and rubber powers\"\n    }\n  ],\n  \"notes\": \"Pirate King - Updated with full abilities!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/characters/luffy",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "characters", "luffy"]
+            }
+          }
+        },
+        {
+          "name": "Delete Character",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/characters/nami",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "characters", "nami"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/health",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["health"]
+        }
+      }
+    }
+  ]
+}

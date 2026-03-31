@@ -1,0 +1,21 @@
+# Credenciales de Firebase
+config/credentials/*.json
+
+# Binarios
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary
+*.test
+
+# Output of the go build
+*.out
+
+# Dependency directories
+vendor/
+
+# Go workspace file
+go.work

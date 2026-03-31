@@ -1,0 +1,119 @@
+[
+  {
+    "_document_id": "chopper",
+    "_document_path": "projects/conectionwdb/databases/(default)/documents/characters/chopper",
+    "alias": "Cotton Candy Lover",
+    "devilFruit": {
+      "description": "Allows the user to transform into a human hybrid and full human form",
+      "name": "Hito Hito no Mi",
+      "type": "Zoan"
+    },
+    "firstAppearance": "Chapter 134",
+    "id": "chopper",
+    "name": "Tony Tony Chopper",
+    "notes": "The youngest member of the Straw Hat crew and their doctor",
+    "role": "Doctor",
+    "species": "Reindeer"
+  },
+  {
+    "_document_id": "luffy",
+    "_document_path": "projects/conectionwdb/databases/(default)/documents/characters/luffy",
+    "abilities": [
+      {
+        "notes": "...",
+        "type": "Gear 5"
+      },
+      {
+        "notes": "...",
+        "type": "Gear 4 - Boundman"
+      }
+    ],
+    "alias": "Straw Hat - Gear 5",
+    "devilFruit": {
+      "description": "Grants the power of the Sun God Nika...",
+      "name": "Hito Hito no Mi, Model: Nika",
+      "type": "Mythical Zoan"
+    },
+    "firstAppearance": "Chapter 1",
+    "hakiAbilities": [
+      {
+        "awakened": true,
+        "hakiType": "Conqueror",
+        "notes": "...",
+        "proficiency": "Master"
+      },
+      {
+        "awakened": true,
+        "hakiType": "Armament",
+        "proficiency": "Advanced"
+      },
+      {
+        "awakened": false,
+        "hakiType": "Observation",
+        "proficiency": "Advanced"
+      }
+    ],
+    "id": "luffy",
+    "name": "Monkey D. Luffy",
+    "notes": "Pirate King - Updated with full abilities!",
+    "role": "Captain",
+    "species": "Human"
+  },
+  {
+    "_document_id": "sanji",
+    "_document_path": "projects/conectionwdb/databases/(default)/documents/characters/sanji",
+    "abilities": [
+      {
+        "notes": "Fire-based kicks",
+        "type": "Diable Jambe"
+      },
+      {
+        "notes": "Geppo technique",
+        "type": "Sky Walk"
+      }
+    ],
+    "alias": "Black Leg",
+    "firstAppearance": "Chapter 43",
+    "hakiAbilities": [
+      {
+        "awakened": true,
+        "hakiType": "Observation",
+        "notes": "Can sense women in danger",
+        "proficiency": "Advanced"
+      },
+      {
+        "awakened": true,
+        "hakiType": "Armament",
+        "notes": "Diable Jambe enhancement",
+        "proficiency": "Advanced"
+      }
+    ],
+    "id": "sanji",
+    "name": "Vinsmoke Sanji",
+    "notes": "Master chef of the Straw Hat Pirates",
+    "role": "Cook",
+    "species": "Human"
+  },
+  {
+    "_document_id": "usopp",
+    "_document_path": "projects/conectionwdb/databases/(default)/documents/characters/usopp",
+    "alias": "God Usopp",
+    "firstAppearance": "Chapter 23",
+    "id": "usopp",
+    "name": "Usopp",
+    "notes": "Brave warrior of the sea and best sniper",
+    "role": "Sniper",
+    "species": "Human"
+  },
+  {
+    "_document_id": "zoro",
+    "_document_path": "projects/conectionwdb/databases/(default)/documents/characters/zoro",
+    "alias": "Pirate Hunter",
+    "firstAppearance": "Chapter 3",
+    "id": "zoro",
+    "name": "Roronoa Zoro",
+    "notes": "World's Greatest Swordsman in training",
+    "role": "Swordsman",
+    "species": "Human"
+  }
+]
