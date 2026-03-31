@@ -254,9 +254,33 @@ func (r *CharacterRepository) DeleteCharacter(ctx context.Context, id string) er
 // Helpers de dual-write
 // ---------------------------------------------------------------------------
 
-// writeNormalized escribe un personaje en las colecciones normalizadas usando batch
+// maxBatchSize es el límite seguro de operaciones por batch de Firestore (máx 500).
+const maxBatchSize = 499
+
+// commitInBatches divide las operaciones en lotes de máximo maxBatchSize
+// y las commitea secuencialmente, respetando el límite de Firestore (BUG-1 fix).
+func (r *CharacterRepository) commitInBatches(ctx context.Context, ops []func(*firestore.WriteBatch)) error {
+	for i := 0; i < len(ops); i += maxBatchSize {
+		end := i + maxBatchSize
+		if end > len(ops) {
+			end = len(ops)
+		}
+		batch := r.client.Batch()
+		for _, op := range ops[i:end] {
+			op(batch)
+		}
+		if _, err := batch.Commit(ctx); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// writeNormalized escribe un personaje en las colecciones normalizadas.
+// Primero elimina haki y abilities existentes para evitar docs huérfanos en updates
+// (BUG-2 fix), luego escribe los nuevos. Usa commitInBatches para el límite de 500 (BUG-1 fix).
 func (r *CharacterRepository) writeNormalized(ctx context.Context, character *domain.Character) error {
-	batch := r.client.Batch()
+	var ops []func(*firestore.WriteBatch)
 	now := time.Now()
 
 	// 1. characters_new (campos base sin relaciones embebidas)
@@ -270,10 +294,12 @@ func (r *CharacterRepository) writeNormalized(ctx context.Context, character *do
 		Notes:           character.Notes,
 		MigratedAt:      now,
 	}
-	batch.Set(r.client.Collection("characters_new").Doc(character.ID), normChar)
+	charRef := r.client.Collection("characters_new").Doc(character.ID)
+	ops = append(ops, func(b *firestore.WriteBatch) { b.Set(charRef, normChar) })
 
-	// 2. devilfruits: eliminar la anterior y escribir la nueva
+	// 2. devilfruits: Set si existe, Delete si se quitó
 	fruitID := fmt.Sprintf("%s_fruit", character.ID)
+	fruitRef := r.client.Collection("devilfruits").Doc(fruitID)
 	if character.DevilFruit != nil {
 		normFruit := normalizedDevilFruit{
 			FruitID:     fruitID,
@@ -283,13 +309,45 @@ func (r *CharacterRepository) writeNormalized(ctx context.Context, character *do
 			Description: character.DevilFruit.Description,
 			UpdatedAt:   now,
 		}
-		batch.Set(r.client.Collection("devilfruits").Doc(fruitID), normFruit)
+		ops = append(ops, func(b *firestore.WriteBatch) { b.Set(fruitRef, normFruit) })
 	} else {
-		// Si se quitó la fruta del diablo, eliminarla de la colección normalizada
-		batch.Delete(r.client.Collection("devilfruits").Doc(fruitID))
+		ops = append(ops, func(b *firestore.WriteBatch) { b.Delete(fruitRef) })
 	}
 
-	// 3. character_haki: reemplazar todos los registros del personaje
+	// 3. Eliminar haki existentes antes de escribir los nuevos (BUG-2 fix).
+	//    Sin este paso, reducir de 3 a 2 haki deja el tercero huérfano para siempre.
+	hakiIter := r.client.Collection("character_haki").Where("character_id", "==", character.ID).Documents(ctx)
+	for {
+		doc, err := hakiIter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			hakiIter.Stop()
+			return fmt.Errorf("error leyendo haki existente de %s: %w", character.ID, err)
+		}
+		ref := doc.Ref
+		ops = append(ops, func(b *firestore.WriteBatch) { b.Delete(ref) })
+	}
+	hakiIter.Stop()
+
+	// 4. Eliminar abilities existentes antes de escribir las nuevas (BUG-2 fix).
+	abilityIter := r.client.Collection("abilities").Where("character_id", "==", character.ID).Documents(ctx)
+	for {
+		doc, err := abilityIter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			abilityIter.Stop()
+			return fmt.Errorf("error leyendo abilities existentes de %s: %w", character.ID, err)
+		}
+		ref := doc.Ref
+		ops = append(ops, func(b *firestore.WriteBatch) { b.Delete(ref) })
+	}
+	abilityIter.Stop()
+
+	// 5. Escribir nuevos haki
 	for i, haki := range character.HakiAbilities {
 		hakiID := fmt.Sprintf("%s_haki_%d", character.ID, i)
 		hakiTypeID, ok := hakiTypeIDs[haki.HakiType]
@@ -305,10 +363,11 @@ func (r *CharacterRepository) writeNormalized(ctx context.Context, character *do
 			Notes:       haki.Notes,
 			UpdatedAt:   now,
 		}
-		batch.Set(r.client.Collection("character_haki").Doc(hakiID), normHaki)
+		ref := r.client.Collection("character_haki").Doc(hakiID)
+		ops = append(ops, func(b *firestore.WriteBatch) { b.Set(ref, normHaki) })
 	}
 
-	// 4. abilities: reemplazar todas las habilidades del personaje
+	// 6. Escribir nuevas abilities
 	for i, ability := range character.Abilities {
 		abilityID := fmt.Sprintf("%s_ability_%d", character.ID, i)
 		normAbility := normalizedAbility{
@@ -318,27 +377,27 @@ func (r *CharacterRepository) writeNormalized(ctx context.Context, character *do
 			Notes:       ability.Notes,
 			UpdatedAt:   now,
 		}
-		batch.Set(r.client.Collection("abilities").Doc(abilityID), normAbility)
+		ref := r.client.Collection("abilities").Doc(abilityID)
+		ops = append(ops, func(b *firestore.WriteBatch) { b.Set(ref, normAbility) })
 	}
 
-	_, err := batch.Commit(ctx)
-	if err != nil {
-		return fmt.Errorf("dual-write error para %s: %v", character.ID, err)
-	}
-	return nil
+	return r.commitInBatches(ctx, ops)
 }
 
-// deleteNormalized elimina todos los documentos normalizados de un personaje
+// deleteNormalized elimina todos los documentos normalizados de un personaje.
+// Usa commitInBatches para respetar el límite de 500 ops de Firestore (BUG-1 fix).
 func (r *CharacterRepository) deleteNormalized(ctx context.Context, id string) error {
-	batch := r.client.Batch()
+	var ops []func(*firestore.WriteBatch)
 
 	// characters_new
-	batch.Delete(r.client.Collection("characters_new").Doc(id))
+	charRef := r.client.Collection("characters_new").Doc(id)
+	ops = append(ops, func(b *firestore.WriteBatch) { b.Delete(charRef) })
 
 	// devilfruits
-	batch.Delete(r.client.Collection("devilfruits").Doc(fmt.Sprintf("%s_fruit", id)))
+	fruitRef := r.client.Collection("devilfruits").Doc(fmt.Sprintf("%s_fruit", id))
+	ops = append(ops, func(b *firestore.WriteBatch) { b.Delete(fruitRef) })
 
-	// character_haki y abilities: necesitamos buscarlos por character_id
+	// character_haki y abilities: query por character_id para no depender de IDs posicionales
 	for _, coll := range []string{"character_haki", "abilities"} {
 		iter := r.client.Collection(coll).Where("character_id", "==", id).Documents(ctx)
 		for {
@@ -348,16 +407,13 @@ func (r *CharacterRepository) deleteNormalized(ctx context.Context, id string) e
 			}
 			if err != nil {
 				iter.Stop()
-				break
+				return fmt.Errorf("error listando %s para delete de %s: %w", coll, id, err)
 			}
-			batch.Delete(doc.Ref)
+			ref := doc.Ref
+			ops = append(ops, func(b *firestore.WriteBatch) { b.Delete(ref) })
 		}
 		iter.Stop()
 	}
 
-	_, err := batch.Commit(ctx)
-	if err != nil {
-		return fmt.Errorf("dual-write delete error para %s: %v", id, err)
-	}
-	return nil
+	return r.commitInBatches(ctx, ops)
 }
