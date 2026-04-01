@@ -1,3 +1,14 @@
+// @title           One Piece API
+// @version         1.0
+// @description     API REST para gestionar personajes e islas del mundo de One Piece. Proyecto de estudio con Clean Architecture en Go + Firestore.
+// @contact.name    William Luna
+// @license.name    MIT
+// @host            localhost:8080
+// @BasePath        /
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name X-API-Key
+// @description Requerido para POST, PUT y DELETE. Configura la variable de entorno API_KEY en el servidor.
 package main
 
 import (
@@ -8,6 +19,7 @@ import (
 	"onepiece-api/config"
 	"onepiece-api/controller"
 	"onepiece-api/domain"
+	_ "onepiece-api/docs"
 	"onepiece-api/repository"
 	"onepiece-api/router"
 	"onepiece-api/usecase"

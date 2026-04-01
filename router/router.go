@@ -6,6 +6,8 @@ import (
 
 	"onepiece-api/controller"
 	"onepiece-api/middleware"
+
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 func SetupRoutes(characterController *controller.CharacterController, islandController *controller.IslandController) http.Handler {
@@ -90,6 +92,9 @@ func SetupRoutes(characterController *controller.CharacterController, islandCont
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(`{"status":"ok","message":"One Piece API is running"}`))
 	})
+
+	// Swagger UI — documentación interactiva en /docs/index.html
+	mux.Handle("/docs/", httpSwagger.WrapHandler)
 
 	// -----------------------------------------------------------------------
 	// Islands — orden importante: rutas específicas antes que el wildcard /{id}
