@@ -5,6 +5,7 @@ go 1.24.0
 require (
 	cloud.google.com/go/firestore v1.20.0
 	github.com/google/uuid v1.6.0
+	golang.org/x/sync v0.16.0
 	google.golang.org/api v0.247.0
 )
 
@@ -29,7 +30,6 @@ require (
 	golang.org/x/crypto v0.41.0 // indirect
 	golang.org/x/net v0.43.0 // indirect
 	golang.org/x/oauth2 v0.30.0 // indirect
-	golang.org/x/sync v0.16.0 // indirect
 	golang.org/x/sys v0.35.0 // indirect
 	golang.org/x/text v0.28.0 // indirect
 	golang.org/x/time v0.12.0 // indirect

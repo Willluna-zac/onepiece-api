@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"sync"
 	"time"
 
 	"cloud.google.com/go/firestore"
+	"golang.org/x/sync/errgroup"
 	"google.golang.org/api/iterator"
 
 	"onepiece-api/domain"
@@ -100,7 +102,9 @@ func (r *CharacterRepository) CreateCharacter(ctx context.Context, character *do
 	return r.writeNormalized(ctx, character)
 }
 
-// assembleCharacter construye un Character completo desde las colecciones normalizadas
+// assembleCharacter construye un Character completo desde las colecciones normalizadas.
+// Las 3 sub-queries (devilfruits, character_haki, abilities) se ejecutan en paralelo
+// con errgroup para reducir el tiempo de N*3 queries secuenciales a N queries paralelas.
 func (r *CharacterRepository) assembleCharacter(ctx context.Context, base normalizedCharacter) (domain.Character, error) {
 	char := domain.Character{
 		ID:              base.ID,
@@ -112,66 +116,106 @@ func (r *CharacterRepository) assembleCharacter(ctx context.Context, base normal
 		Notes:           base.Notes,
 	}
 
-	// Fruta del diablo
-	fruitIter := r.client.Collection("devilfruits").Where("character_id", "==", base.ID).Documents(ctx)
-	defer fruitIter.Stop()
-	if fruitDoc, err := fruitIter.Next(); err == nil {
-		var fruit normalizedDevilFruit
-		if err := fruitDoc.DataTo(&fruit); err == nil {
-			char.DevilFruit = &domain.DevilFruit{
-				Name:        fruit.Name,
-				Type:        fruit.Type,
-				Description: fruit.Description,
-			}
-		}
-	}
+	var (
+		mu         sync.Mutex
+		devilFruit *domain.DevilFruit
+		hakis      []domain.HakiAbility
+		abilities  []domain.Ability
+	)
 
-	// Haki
-	hakiIter := r.client.Collection("character_haki").Where("character_id", "==", base.ID).Documents(ctx)
-	defer hakiIter.Stop()
-	for {
-		doc, err := hakiIter.Next()
-		if err == iterator.Done {
-			break
-		}
+	g, ctx := errgroup.WithContext(ctx)
+
+	// Query 1: fruta del diablo
+	g.Go(func() error {
+		iter := r.client.Collection("devilfruits").Where("character_id", "==", base.ID).Documents(ctx)
+		defer iter.Stop()
+		doc, err := iter.Next()
 		if err != nil {
-			break
+			return nil // sin fruta es válido
 		}
-		var h normalizedHaki
-		if err := doc.DataTo(&h); err == nil {
+		var fruit normalizedDevilFruit
+		if err := doc.DataTo(&fruit); err != nil {
+			return err
+		}
+		mu.Lock()
+		devilFruit = &domain.DevilFruit{
+			Name:        fruit.Name,
+			Type:        fruit.Type,
+			Description: fruit.Description,
+		}
+		mu.Unlock()
+		return nil
+	})
+
+	// Query 2: haki
+	g.Go(func() error {
+		iter := r.client.Collection("character_haki").Where("character_id", "==", base.ID).Documents(ctx)
+		defer iter.Stop()
+		var result []domain.HakiAbility
+		for {
+			doc, err := iter.Next()
+			if err == iterator.Done {
+				break
+			}
+			if err != nil {
+				return err
+			}
+			var h normalizedHaki
+			if err := doc.DataTo(&h); err != nil {
+				return err
+			}
 			hakiName := hakiTypeNames[h.HakiTypeID]
 			if hakiName == "" {
 				hakiName = h.HakiTypeID
 			}
-			char.HakiAbilities = append(char.HakiAbilities, domain.HakiAbility{
+			result = append(result, domain.HakiAbility{
 				HakiType:    hakiName,
 				Proficiency: h.Proficiency,
 				Awakened:    h.Awakened,
 				Notes:       h.Notes,
 			})
 		}
-	}
+		mu.Lock()
+		hakis = result
+		mu.Unlock()
+		return nil
+	})
 
-	// Abilities
-	abilityIter := r.client.Collection("abilities").Where("character_id", "==", base.ID).Documents(ctx)
-	defer abilityIter.Stop()
-	for {
-		doc, err := abilityIter.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			break
-		}
-		var a normalizedAbility
-		if err := doc.DataTo(&a); err == nil {
-			char.Abilities = append(char.Abilities, domain.Ability{
+	// Query 3: abilities
+	g.Go(func() error {
+		iter := r.client.Collection("abilities").Where("character_id", "==", base.ID).Documents(ctx)
+		defer iter.Stop()
+		var result []domain.Ability
+		for {
+			doc, err := iter.Next()
+			if err == iterator.Done {
+				break
+			}
+			if err != nil {
+				return err
+			}
+			var a normalizedAbility
+			if err := doc.DataTo(&a); err != nil {
+				return err
+			}
+			result = append(result, domain.Ability{
 				Type:  a.Type,
 				Notes: a.Notes,
 			})
 		}
+		mu.Lock()
+		abilities = result
+		mu.Unlock()
+		return nil
+	})
+
+	if err := g.Wait(); err != nil {
+		return domain.Character{}, fmt.Errorf("assembleCharacter %s: %w", base.ID, err)
 	}
 
+	char.DevilFruit = devilFruit
+	char.HakiAbilities = hakis
+	char.Abilities = abilities
 	return char, nil
 }
 
