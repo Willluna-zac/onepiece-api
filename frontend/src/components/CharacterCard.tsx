@@ -15,41 +15,42 @@ export const FRUIT_EMOJI: Record<string, string> = {
   'Paramecia':     '🍇',
 }
 
+function Avatar({ name }: { name: string }) {
+  return (
+    <img
+      src={`https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1a2e45&color=f5c842&bold=true&size=128&font-size=0.33`}
+      alt={name}
+      className="h-32 w-32 rounded-full"
+    />
+  )
+}
+
 export function CharacterCard({ char }: { char: Character }) {
   const fruitEmoji = char.devilFruit ? (FRUIT_EMOJI[char.devilFruit.type] ?? '🍎') : null
 
   return (
     <Link to={`/characters/${char.id}`} className="card flex flex-col hover:scale-[1.02] transition-transform">
-      {/* Imagen con fallback a avatar de iniciales */}
+      {/* Imagen */}
       <div className="mb-3 flex justify-center bg-navy-dark rounded-lg py-2 min-h-[140px] items-center">
         {char.imageUrl ? (
           <img
             src={char.imageUrl}
             alt={char.name}
             referrerPolicy="no-referrer"
-            crossOrigin="anonymous"
-            className="h-36 w-auto object-contain rounded-lg"
+            className="h-36 w-auto max-w-full object-contain rounded-lg"
             onError={e => {
-              const img = e.target as HTMLImageElement
-              // Fallback: avatar con iniciales
-              img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(char.name)}&background=1a2e45&color=f5c842&bold=true&size=128&font-size=0.33`
-              img.referrerPolicy = 'origin'
+              const el = e.currentTarget
+              el.onerror = null // evita loop
+              el.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(char.name)}&background=1a2e45&color=f5c842&bold=true&size=128&font-size=0.33`
             }}
           />
         ) : (
-          <img
-            src={`https://ui-avatars.com/api/?name=${encodeURIComponent(char.name)}&background=1a2e45&color=f5c842&bold=true&size=128&font-size=0.33`}
-            alt={char.name}
-            className="h-32 w-32 rounded-full"
-          />
+          <Avatar name={char.name} />
         )}
       </div>
 
-      <div className="flex items-start justify-between mb-1">
-        <h3 className="font-pirate text-gold text-xl leading-tight">{char.name}</h3>
-      </div>
-
-      <p className="text-straw/50 text-xs mb-1 italic truncate">"{char.alias}"</p>
+      <h3 className="font-pirate text-gold text-xl leading-tight mb-0.5">{char.name}</h3>
+      <p className="text-straw/50 text-xs italic truncate mb-1">"{char.alias}"</p>
       <p className="text-straw/60 text-sm mb-3">{char.role}</p>
 
       <div className="flex flex-wrap gap-1.5 text-xs mt-auto">
