@@ -73,6 +73,33 @@ func (m *mockRepo) DeleteCharacter(_ context.Context, id string) error {
 	return nil
 }
 
+func (m *mockRepo) SearchByName(_ context.Context, name string) ([]domain.Character, error) {
+	if m.failOn == "SearchByName" {
+		return nil, errors.New("mock repo error")
+	}
+	var results []domain.Character
+	term := strings.ToLower(name)
+	for _, c := range m.characters {
+		if strings.Contains(strings.ToLower(c.Name), term) || strings.Contains(strings.ToLower(c.Alias), term) {
+			results = append(results, *c)
+		}
+	}
+	return results, nil
+}
+
+func (m *mockRepo) GetWithDevilFruit(_ context.Context) ([]domain.Character, error) {
+	if m.failOn == "GetWithDevilFruit" {
+		return nil, errors.New("mock repo error")
+	}
+	var results []domain.Character
+	for _, c := range m.characters {
+		if c.DevilFruit != nil {
+			results = append(results, *c)
+		}
+	}
+	return results, nil
+}
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------

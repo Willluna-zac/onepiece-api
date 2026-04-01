@@ -295,6 +295,105 @@ func (r *CharacterRepository) DeleteCharacter(ctx context.Context, id string) er
 }
 
 // ---------------------------------------------------------------------------
+// Queries optimizadas (PERF-2 fix)
+// ---------------------------------------------------------------------------
+
+// SearchByName busca personajes por nombre usando una Firestore range query (prefix).
+// Complejidad: O(k) donde k = resultados — no carga N personajes en memoria.
+//
+// Limitación: la búsqueda es case-sensitive y solo soporta prefijo (ej: "Mon" → "Monkey D. Luffy").
+// Para búsqueda substring case-insensitive agregar campo "name_lower" al schema.
+func (r *CharacterRepository) SearchByName(ctx context.Context, name string) ([]domain.Character, error) {
+	// Range query de Firestore para prefix match: todos los docs donde
+	// name >= query y name <= query + U+F8FF (carácter Unicode máximo).
+	iter := r.client.Collection("characters_new").
+		Where("name", ">=", name).
+		Where("name", "<=", name+"\uf8ff").
+		Documents(ctx)
+	defer iter.Stop()
+
+	var characters []domain.Character
+	for {
+		doc, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return nil, fmt.Errorf("SearchByName query error: %w", err)
+		}
+		var base normalizedCharacter
+		if err := doc.DataTo(&base); err != nil {
+			return nil, err
+		}
+		char, err := r.assembleCharacter(ctx, base)
+		if err != nil {
+			return nil, err
+		}
+		characters = append(characters, char)
+	}
+	return characters, nil
+}
+
+// GetWithDevilFruit consulta la colección "devilfruits" para obtener los IDs de personajes
+// con fruta, luego carga solo esos personajes en paralelo con errgroup.
+// Complejidad: O(M) donde M = personajes con fruta, en vez de O(N) total.
+func (r *CharacterRepository) GetWithDevilFruit(ctx context.Context) ([]domain.Character, error) {
+	// 1. Obtener todos los character_id desde la colección devilfruits
+	iter := r.client.Collection("devilfruits").Documents(ctx)
+	defer iter.Stop()
+
+	var charIDs []string
+	for {
+		doc, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return nil, fmt.Errorf("GetWithDevilFruit query error: %w", err)
+		}
+		var fruit normalizedDevilFruit
+		if err := doc.DataTo(&fruit); err != nil {
+			return nil, err
+		}
+		charIDs = append(charIDs, fruit.CharacterID)
+	}
+
+	if len(charIDs) == 0 {
+		return nil, nil
+	}
+
+	// 2. Cargar cada personaje en paralelo (max 10 goroutines simultáneas)
+	var (
+		mu      sync.Mutex
+		results []domain.Character
+	)
+	g, gCtx := errgroup.WithContext(ctx)
+	sem := make(chan struct{}, 10)
+
+	for _, id := range charIDs {
+		id := id
+		g.Go(func() error {
+			sem <- struct{}{}
+			defer func() { <-sem }()
+
+			char, err := r.GetCharacterByID(gCtx, id)
+			if err != nil {
+				return fmt.Errorf("fetch character %s: %w", id, err)
+			}
+			mu.Lock()
+			results = append(results, *char)
+			mu.Unlock()
+			return nil
+		})
+	}
+
+	if err := g.Wait(); err != nil {
+		return nil, err
+	}
+	return results, nil
+}
+
+// ---------------------------------------------------------------------------
 // Helpers de dual-write
 // ---------------------------------------------------------------------------
 

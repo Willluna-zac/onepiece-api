@@ -75,38 +75,19 @@ func (uc *CharacterUsecase) DeleteCharacter(ctx context.Context, id string) erro
 	return uc.repo.DeleteCharacter(ctx, id)
 }
 
-// SearchByName busca personajes por nombre
+// SearchByName busca personajes por nombre delegando al repository.
+// El repository usa una Firestore range query (prefix, case-sensitive).
 func (uc *CharacterUsecase) SearchByName(ctx context.Context, name string) ([]domain.Character, error) {
 	if name == "" {
 		return nil, errors.New("el nombre no puede estar vacio")
 	}
-	all, err := uc.repo.GetAllCharacters(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var results []domain.Character
-	term := strings.ToLower(name)
-	for _, c := range all {
-		if strings.Contains(strings.ToLower(c.Name), term) || strings.Contains(strings.ToLower(c.Alias), term) {
-			results = append(results, c)
-		}
-	}
-	return results, nil
+	return uc.repo.SearchByName(ctx, name)
 }
 
 // GetCharactersWithDevilFruit obtiene personajes con fruta del diablo
+// delegando al repository, que consulta la colección devilfruits directamente.
 func (uc *CharacterUsecase) GetCharactersWithDevilFruit(ctx context.Context) ([]domain.Character, error) {
-	all, err := uc.repo.GetAllCharacters(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var results []domain.Character
-	for _, c := range all {
-		if c.DevilFruit != nil {
-			results = append(results, c)
-		}
-	}
-	return results, nil
+	return uc.repo.GetWithDevilFruit(ctx)
 }
 
 // validateCharacter valida los datos de un personaje
