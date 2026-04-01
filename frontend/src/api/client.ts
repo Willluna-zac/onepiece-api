@@ -18,25 +18,27 @@ export interface DevilFruit {
   description: string
 }
 export interface HakiAbility {
-  type: string
-  level: string
+  hakiType: string      // "Conqueror" | "Armament" | "Observation"
+  proficiency: string   // "Basic" | "Advanced" | "Master"
+  awakened: boolean
+  notes?: string
 }
 export interface Ability {
-  name: string
-  description: string
+  type: string
+  notes?: string
 }
 export interface Character {
   id: string
   name: string
-  origin: string
-  age: number
-  bounty: number
+  alias: string
+  species: string
   role: string
-  crew: string
-  status: string
+  firstAppearance: string
+  imageUrl?: string
   devilFruit?: DevilFruit
   hakiAbilities?: HakiAbility[]
   abilities?: Ability[]
+  notes?: string
 }
 
 export const charactersApi = {

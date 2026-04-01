@@ -8,6 +8,7 @@ type Character struct {
 	Species         string        `firestore:"species" json:"species"`
 	Role            string        `firestore:"role" json:"role"`
 	FirstAppearance string        `firestore:"firstAppearance" json:"firstAppearance"`
+	ImageURL        string        `firestore:"imageUrl,omitempty" json:"imageUrl,omitempty"`
 	DevilFruit      *DevilFruit   `firestore:"devilFruit,omitempty" json:"devilFruit,omitempty"`
 	HakiAbilities   []HakiAbility `firestore:"hakiAbilities,omitempty" json:"hakiAbilities,omitempty"`
 	Abilities       []Ability     `firestore:"abilities,omitempty" json:"abilities,omitempty"`
