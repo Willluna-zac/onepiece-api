@@ -2,6 +2,7 @@ import { useParams, Link } from 'react-router-dom'
 import { useCharacter } from '../hooks/useApi'
 import { Loader, ErrorMsg } from '../components/Loader'
 import { FRUIT_EMOJI } from '../components/CharacterCard'
+import { proxyImage } from '../api/client'
 
 const HAKI_COLOR: Record<string, string> = {
   Conqueror:   'border-purple-500 bg-purple-900/30',
@@ -21,25 +22,20 @@ export default function CharacterDetailPage() {
 
   const fruitEmoji = char.devilFruit ? (FRUIT_EMOJI[char.devilFruit.type] ?? '🍎') : null
   const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(char.name)}&background=1a2e45&color=f5c842&bold=true&size=192&font-size=0.33`
+  const imgSrc = proxyImage(char.imageUrl) ?? avatarUrl
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
       <Link to="/" className="text-gold hover:text-gold-light text-sm mb-6 inline-block">← Volver</Link>
 
-      {/* Header */}
       <div className="card mb-6">
         <div className="flex gap-6 flex-col sm:flex-row">
           <div className="flex justify-center">
             <img
-              src={char.imageUrl ?? avatarUrl}
+              src={imgSrc}
               alt={char.name}
-              referrerPolicy="no-referrer"
               className="h-48 w-auto object-contain rounded-xl"
-              onError={e => {
-                const img = e.target as HTMLImageElement
-                img.src = avatarUrl
-                img.referrerPolicy = 'origin'
-              }}
+              onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = avatarUrl }}
             />
           </div>
           <div className="flex-1">
@@ -57,7 +53,6 @@ export default function CharacterDetailPage() {
         </div>
       </div>
 
-      {/* Devil Fruit */}
       {char.devilFruit && (
         <div className="card mb-4">
           <h2 className="font-pirate text-gold text-2xl mb-3">{fruitEmoji} Fruta del Diablo</h2>
@@ -67,7 +62,6 @@ export default function CharacterDetailPage() {
         </div>
       )}
 
-      {/* Haki */}
       {(char.hakiAbilities ?? []).length > 0 && (
         <div className="card mb-4">
           <h2 className="font-pirate text-gold text-2xl mb-3">⚡ Haki</h2>
@@ -87,7 +81,6 @@ export default function CharacterDetailPage() {
         </div>
       )}
 
-      {/* Abilities */}
       {(char.abilities ?? []).length > 0 && (
         <div className="card">
           <h2 className="font-pirate text-gold text-2xl mb-3">⚔️ Habilidades</h2>

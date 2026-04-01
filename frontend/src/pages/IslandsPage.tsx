@@ -165,9 +165,9 @@ export default function IslandsPage() {
             </div>
             <p className="text-straw/50 text-xs mb-2">{isl.region} · ({isl.x}, {isl.y})</p>
             <p className="text-straw/70 text-sm mb-3">{isl.description}</p>
-            {isl.notable.length > 0 && (
+            {isl.notableCharacters.length > 0 && (
               <div className="flex flex-wrap gap-1">
-                {isl.notable.map(n => (
+                {isl.notableCharacters.map(n => (
                   <span key={n} className="badge bg-navy text-straw/60 text-xs">{n}</span>
                 ))}
               </div>

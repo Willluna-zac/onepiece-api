@@ -1,4 +1,5 @@
 import type { Character } from '../api/client'
+import { proxyImage } from '../api/client'
 import { Link } from 'react-router-dom'
 
 const HAKI_COLOR: Record<string, string> = {
@@ -15,38 +16,24 @@ export const FRUIT_EMOJI: Record<string, string> = {
   'Paramecia':     '🍇',
 }
 
-function Avatar({ name }: { name: string }) {
-  return (
-    <img
-      src={`https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1a2e45&color=f5c842&bold=true&size=128&font-size=0.33`}
-      alt={name}
-      className="h-32 w-32 rounded-full"
-    />
-  )
-}
-
 export function CharacterCard({ char }: { char: Character }) {
   const fruitEmoji = char.devilFruit ? (FRUIT_EMOJI[char.devilFruit.type] ?? '🍎') : null
+  const imgSrc = proxyImage(char.imageUrl)
+  const avatarSrc = `https://ui-avatars.com/api/?name=${encodeURIComponent(char.name)}&background=1a2e45&color=f5c842&bold=true&size=128&font-size=0.33`
 
   return (
     <Link to={`/characters/${char.id}`} className="card flex flex-col hover:scale-[1.02] transition-transform">
-      {/* Imagen */}
       <div className="mb-3 flex justify-center bg-navy-dark rounded-lg py-2 min-h-[140px] items-center">
-        {char.imageUrl ? (
-          <img
-            src={char.imageUrl}
-            alt={char.name}
-            referrerPolicy="no-referrer"
-            className="h-36 w-auto max-w-full object-contain rounded-lg"
-            onError={e => {
-              const el = e.currentTarget
-              el.onerror = null // evita loop
-              el.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(char.name)}&background=1a2e45&color=f5c842&bold=true&size=128&font-size=0.33`
-            }}
-          />
-        ) : (
-          <Avatar name={char.name} />
-        )}
+        <img
+          src={imgSrc ?? avatarSrc}
+          alt={char.name}
+          className="h-36 w-auto max-w-full object-contain rounded-lg"
+          onError={e => {
+            const el = e.currentTarget
+            el.onerror = null
+            el.src = avatarSrc
+          }}
+        />
       </div>
 
       <h3 className="font-pirate text-gold text-xl leading-tight mb-0.5">{char.name}</h3>

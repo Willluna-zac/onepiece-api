@@ -12,6 +12,10 @@ import (
 
 func SetupRoutes(characterController *controller.CharacterController, islandController *controller.IslandController) http.Handler {
 	mux := http.NewServeMux()
+	imageProxy := controller.NewImageProxyController()
+
+	// Image proxy — permite cargar imágenes externas sin problemas de CORS/hotlink
+	mux.HandleFunc("/api/proxy/image", imageProxy.ProxyImage)
 
 	mux.HandleFunc("/api/characters", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
