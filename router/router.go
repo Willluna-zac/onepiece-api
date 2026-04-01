@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"onepiece-api/controller"
+	"onepiece-api/middleware"
 )
 
 func SetupRoutes(characterController *controller.CharacterController, islandController *controller.IslandController) http.Handler {
@@ -12,8 +13,8 @@ func SetupRoutes(characterController *controller.CharacterController, islandCont
 
 	mux.HandleFunc("/api/characters", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-API-Key")
 
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusOK)
@@ -24,7 +25,7 @@ func SetupRoutes(characterController *controller.CharacterController, islandCont
 		case http.MethodGet:
 			characterController.GetAllCharacters(w, r)
 		case http.MethodPost:
-			characterController.CreateCharacter(w, r)
+			middleware.APIKeyMiddleware(characterController.CreateCharacter)(w, r)
 		default:
 			http.Error(w, "Método no permitido", http.StatusMethodNotAllowed)
 		}
@@ -59,7 +60,7 @@ func SetupRoutes(characterController *controller.CharacterController, islandCont
 	mux.HandleFunc("/api/characters/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-API-Key")
 
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusOK)
@@ -76,9 +77,9 @@ func SetupRoutes(characterController *controller.CharacterController, islandCont
 		case http.MethodGet:
 			characterController.GetCharacterByID(w, r)
 		case http.MethodPut:
-			characterController.UpdateCharacter(w, r)
+			middleware.APIKeyMiddleware(characterController.UpdateCharacter)(w, r)
 		case http.MethodDelete:
-			characterController.DeleteCharacter(w, r)
+			middleware.APIKeyMiddleware(characterController.DeleteCharacter)(w, r)
 		default:
 			http.Error(w, "Método no permitido", http.StatusMethodNotAllowed)
 		}
@@ -162,5 +163,5 @@ func SetupRoutes(characterController *controller.CharacterController, islandCont
 func setCORS(w http.ResponseWriter, methods string) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", methods)
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-API-Key")
 }
