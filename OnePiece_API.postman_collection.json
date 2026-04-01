@@ -1,178 +1,184 @@
 {
   "info": {
     "name": "One Piece API",
-    "description": "API REST para personajes de One Piece",
+    "_postman_id": "onepiece-api-collection-v2",
+    "description": "Colección completa de la One Piece API. Usa la variable {{BASE_URL}} para el host y {{CHARACTER_ID}} para el ID activo.\n\n**Setup:**\n1. Configura el environment con BASE_URL=http://localhost:8080\n2. Corre 'GET All Characters' primero para ver los IDs disponibles\n3. Copia el ID que quieras en la variable CHARACTER_ID\n4. En producción configura también API_KEY para operaciones de escritura",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
+  "variable": [
+    { "key": "BASE_URL", "value": "http://localhost:8080" },
+    { "key": "CHARACTER_ID", "value": "f6a7ee99-e589-4e3c-8a95-8dba0c0765e2", "description": "Monkey D. Luffy — cámbialo al ID que necesites" },
+    { "key": "API_KEY", "value": "", "description": "Requerido para POST/PUT/DELETE — configura en tu environment" }
+  ],
   "item": [
     {
-      "name": "Characters",
+      "name": "Health",
       "item": [
         {
-          "name": "Get All Characters",
+          "name": "Health Check",
           "request": {
             "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:8080/api/characters",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
-              "path": ["api", "characters"]
-            }
-          }
-        },
-        {
-          "name": "Get Character By ID",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:8080/api/characters/luffy",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
-              "path": ["api", "characters", "luffy"]
-            }
-          }
-        },
-        {
-          "name": "Search Characters",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:8080/api/characters/search?name=luffy",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
-              "path": ["api", "characters", "search"],
-              "query": [
-                {
-                  "key": "name",
-                  "value": "luffy"
-                }
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get Characters With Devil Fruit",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:8080/api/characters/devil-fruits",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
-              "path": ["api", "characters", "devil-fruits"]
-            }
-          }
-        },
-        {
-          "name": "Create Character (Simple)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Nami\",\n  \"alias\": \"Cat Burglar\",\n  \"species\": \"Human\",\n  \"role\": \"Navigator\",\n  \"firstAppearance\": \"Chapter 8\",\n  \"notes\": \"Best navigator in the world\"\n}"
-            },
-            "url": {
-              "raw": "http://localhost:8080/api/characters",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
-              "path": ["api", "characters"]
-            }
-          }
-        },
-        {
-          "name": "Create Character (With Devil Fruit)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Portgas D. Ace\",\n  \"alias\": \"Fire Fist\",\n  \"species\": \"Human\",\n  \"role\": \"Commander\",\n  \"firstAppearance\": \"Chapter 154\",\n  \"devilFruit\": {\n    \"name\": \"Mera Mera no Mi\",\n    \"type\": \"Logia\",\n    \"description\": \"Fire control\"\n  },\n  \"hakiAbilities\": [\n    {\n      \"hakiType\": \"Armament\",\n      \"proficiency\": \"Advanced\",\n      \"awakened\": true\n    },\n    {\n      \"hakiType\": \"Conqueror\",\n      \"proficiency\": \"Advanced\",\n      \"awakened\": false\n    }\n  ],\n  \"notes\": \"Luffy's brother\"\n}"
-            },
-            "url": {
-              "raw": "http://localhost:8080/api/characters",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
-              "path": ["api", "characters"]
-            }
-          }
-        },
-        {
-          "name": "Update Character",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Monkey D. Luffy\",\n  \"alias\": \"Straw Hat - Gear 5\",\n  \"species\": \"Human\",\n  \"role\": \"Captain\",\n  \"firstAppearance\": \"Chapter 1\",\n  \"devilFruit\": {\n    \"name\": \"Hito Hito no Mi, Model: Nika\",\n    \"type\": \"Mythical Zoan\",\n    \"description\": \"Grants the power of the Sun God Nika, allowing rubber-like abilities and Gear 5 awakening\"\n  },\n  \"hakiAbilities\": [\n    {\n      \"hakiType\": \"Conqueror\",\n      \"proficiency\": \"Master\",\n      \"awakened\": true,\n      \"notes\": \"Can coat attacks with Conqueror's Haki\"\n    },\n    {\n      \"hakiType\": \"Armament\",\n      \"proficiency\": \"Advanced\",\n      \"awakened\": true\n    },\n    {\n      \"hakiType\": \"Observation\",\n      \"proficiency\": \"Advanced\",\n      \"awakened\": false\n    }\n  ],\n  \"abilities\": [\n    {\n      \"type\": \"Gear 5\",\n      \"notes\": \"Highest form of Devil Fruit awakening\"\n    },\n    {\n      \"type\": \"Gear 4 - Boundman\",\n      \"notes\": \"Combines Haki and rubber powers\"\n    }\n  ],\n  \"notes\": \"Pirate King - Updated with full abilities!\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "http://localhost:8080/api/characters/luffy",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
-              "path": ["api", "characters", "luffy"]
-            }
-          }
-        },
-        {
-          "name": "Delete Character",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:8080/api/characters/nami",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "8080",
-              "path": ["api", "characters", "nami"]
-            }
+            "url": "{{BASE_URL}}/health"
           }
         }
       ]
     },
     {
-      "name": "Health Check",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "http://localhost:8080/health",
-          "protocol": "http",
-          "host": ["localhost"],
-          "port": "8080",
-          "path": ["health"]
+      "name": "Characters",
+      "item": [
+        {
+          "name": "GET All Characters",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/api/characters",
+            "description": "Lista todos los personajes. Copia un ID de la respuesta y ponlo en la variable CHARACTER_ID."
+          }
+        },
+        {
+          "name": "GET Character by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/api/characters/{{CHARACTER_ID}}"
+          }
+        },
+        {
+          "name": "GET Search by Name",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/characters/search?name=Luffy",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "characters", "search"],
+              "query": [{ "key": "name", "value": "Luffy" }]
+            }
+          }
+        },
+        {
+          "name": "GET Characters with Devil Fruit",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/api/characters/devil-fruits"
+          }
+        },
+        {
+          "name": "POST Create Character",
+          "request": {
+            "method": "POST",
+            "url": "{{BASE_URL}}/api/characters",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-API-Key", "value": "{{API_KEY}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nico Robin\",\n  \"origin\": \"Ohara\",\n  \"age\": 30,\n  \"bounty\": 130000000,\n  \"role\": \"Arqueóloga\",\n  \"crew\": \"Straw Hat Pirates\",\n  \"status\": \"Alive\",\n  \"devilFruit\": {\n    \"name\": \"Hana Hana no Mi\",\n    \"type\": \"Paramecia\",\n    \"description\": \"Permite florecer copias de partes del cuerpo en cualquier superficie\"\n  },\n  \"hakiAbilities\": [\n    { \"type\": \"Armament\", \"level\": \"Advanced\" }\n  ],\n  \"abilities\": [\n    { \"name\": \"Cien Fleur: Wing\", \"description\": \"Florece 100 brazos para volar\" }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "PUT Update Character",
+          "request": {
+            "method": "PUT",
+            "url": "{{BASE_URL}}/api/characters/{{CHARACTER_ID}}",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-API-Key", "value": "{{API_KEY}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Monkey D. Luffy\",\n  \"origin\": \"East Blue\",\n  \"age\": 19,\n  \"bounty\": 3000000000,\n  \"role\": \"Capitán\",\n  \"crew\": \"Straw Hat Pirates\",\n  \"status\": \"Alive\",\n  \"devilFruit\": {\n    \"name\": \"Hito Hito no Mi, Model: Nika\",\n    \"type\": \"Mythical Zoan\",\n    \"description\": \"El poder más poderoso del mundo — transforma al usuario en el Sol God Nika\"\n  },\n  \"hakiAbilities\": [\n    { \"type\": \"Observation\", \"level\": \"Advanced\" },\n    { \"type\": \"Armament\", \"level\": \"Advanced\" },\n    { \"type\": \"Conqueror\", \"level\": \"Advanced\" }\n  ],\n  \"abilities\": [\n    { \"name\": \"Gear 5\", \"description\": \"Forma final desbloqueada con el poder de Nika\" }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "DELETE Character",
+          "request": {
+            "method": "DELETE",
+            "url": "{{BASE_URL}}/api/characters/{{CHARACTER_ID}}",
+            "header": [
+              { "key": "X-API-Key", "value": "{{API_KEY}}" }
+            ]
+          }
         }
-      }
+      ]
+    },
+    {
+      "name": "Islands (Quadtree)",
+      "item": [
+        {
+          "name": "GET All Islands",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/api/islands",
+            "description": "Retorna las 30 islas del mundo de One Piece con coordenadas X/Y"
+          }
+        },
+        {
+          "name": "GET Island by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/api/islands/dawn-island",
+            "description": "Cambia 'dawn-island' por cualquier ID de isla de la lista"
+          }
+        },
+        {
+          "name": "GET Nearest Island (Quadtree)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/islands/nearest?x=1000&y=2600",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "islands", "nearest"],
+              "query": [
+                { "key": "x", "value": "1000", "description": "Longitud (0-10000)" },
+                { "key": "y", "value": "2600", "description": "Latitud (0-5000)" }
+              ]
+            },
+            "description": "Usa el Quadtree para encontrar la isla más cercana en O(log n). Cambia x e y a cualquier coordenada."
+          }
+        },
+        {
+          "name": "GET Islands by Region — East Blue",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/api/islands/region/East Blue"
+          }
+        },
+        {
+          "name": "GET Islands by Region — Grand Line",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/api/islands/region/Grand Line"
+          }
+        },
+        {
+          "name": "GET Islands by Region — New World",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/api/islands/region/New World"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Swagger Docs",
+      "item": [
+        {
+          "name": "Swagger UI",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/docs/index.html",
+            "description": "Abre en el browser para usar la interfaz interactiva"
+          }
+        },
+        {
+          "name": "OpenAPI JSON Spec",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/docs/doc.json"
+          }
+        }
+      ]
     }
   ]
 }
