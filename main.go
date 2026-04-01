@@ -24,9 +24,14 @@ import (
 	"onepiece-api/router"
 	"onepiece-api/usecase"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	// Cargar variables de entorno desde .env (si existe)
+	_ = godotenv.Load()
+
 	// Inicializar Firebase
 	config.InitFirebase()
 	defer config.CloseFirebase()
