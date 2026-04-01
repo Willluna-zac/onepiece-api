@@ -12,5 +12,5 @@ type Island struct {
 	Description       string   `json:"description"`
 	X                 float64  `json:"x"`
 	Y                 float64  `json:"y"`
-	NotableCharacters []string `json:"notable_characters,omitempty"`
+	NotableCharacters []string `json:"notableCharacters,omitempty"`
 }
