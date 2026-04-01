@@ -7,34 +7,55 @@ const HAKI_COLOR: Record<string, string> = {
   Observation: 'bg-blue-900 text-blue-300',
 }
 
+export const FRUIT_EMOJI: Record<string, string> = {
+  'Logia':         '🌋',
+  'Mythical Zoan': '🐲',
+  'Ancient Zoan':  '🦴',
+  'Zoan':          '🦊',
+  'Paramecia':     '🍇',
+}
+
 export function CharacterCard({ char }: { char: Character }) {
+  const fruitEmoji = char.devilFruit ? (FRUIT_EMOJI[char.devilFruit.type] ?? '🍎') : null
+
   return (
-    <Link to={`/characters/${char.id}`} className="card block hover:scale-[1.02] transition-transform">
-      {/* Imagen */}
-      {char.imageUrl && (
-        <div className="mb-3 flex justify-center">
+    <Link to={`/characters/${char.id}`} className="card flex flex-col hover:scale-[1.02] transition-transform">
+      {/* Imagen con fallback a avatar de iniciales */}
+      <div className="mb-3 flex justify-center bg-navy-dark rounded-lg py-2 min-h-[140px] items-center">
+        {char.imageUrl ? (
           <img
             src={char.imageUrl}
             alt={char.name}
+            referrerPolicy="no-referrer"
+            crossOrigin="anonymous"
             className="h-36 w-auto object-contain rounded-lg"
-            onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
+            onError={e => {
+              const img = e.target as HTMLImageElement
+              // Fallback: avatar con iniciales
+              img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(char.name)}&background=1a2e45&color=f5c842&bold=true&size=128&font-size=0.33`
+              img.referrerPolicy = 'origin'
+            }}
           />
-        </div>
-      )}
+        ) : (
+          <img
+            src={`https://ui-avatars.com/api/?name=${encodeURIComponent(char.name)}&background=1a2e45&color=f5c842&bold=true&size=128&font-size=0.33`}
+            alt={char.name}
+            className="h-32 w-32 rounded-full"
+          />
+        )}
+      </div>
 
       <div className="flex items-start justify-between mb-1">
         <h3 className="font-pirate text-gold text-xl leading-tight">{char.name}</h3>
       </div>
 
-      <p className="text-straw/50 text-xs mb-1 italic">"{char.alias}"</p>
-      <p className="text-straw/60 text-sm mb-3">
-        {char.role} · {char.species}
-      </p>
+      <p className="text-straw/50 text-xs mb-1 italic truncate">"{char.alias}"</p>
+      <p className="text-straw/60 text-sm mb-3">{char.role}</p>
 
-      <div className="flex flex-wrap gap-1.5 text-xs">
-        {char.devilFruit && (
+      <div className="flex flex-wrap gap-1.5 text-xs mt-auto">
+        {fruitEmoji && char.devilFruit && (
           <span className="badge bg-purple-900 text-purple-300">
-            🍎 {char.devilFruit.name}
+            {fruitEmoji} {char.devilFruit.name}
           </span>
         )}
         {(char.hakiAbilities ?? []).map(h => (
