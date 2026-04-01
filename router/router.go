@@ -7,7 +7,7 @@ import (
 	"onepiece-api/controller"
 )
 
-func SetupRoutes(characterController *controller.CharacterController) http.Handler {
+func SetupRoutes(characterController *controller.CharacterController, islandController *controller.IslandController) http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/api/characters", func(w http.ResponseWriter, r *http.Request) {
@@ -90,6 +90,61 @@ func SetupRoutes(characterController *controller.CharacterController) http.Handl
 		w.Write([]byte(`{"status":"ok","message":"One Piece API is running"}`))
 	})
 
+	// -----------------------------------------------------------------------
+	// Islands — orden importante: rutas específicas antes que el wildcard /{id}
+	// -----------------------------------------------------------------------
+	mux.HandleFunc("/api/islands", func(w http.ResponseWriter, r *http.Request) {
+		setCORS(w, "GET, OPTIONS")
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		if r.Method != http.MethodGet {
+			http.Error(w, "Método no permitido", http.StatusMethodNotAllowed)
+			return
+		}
+		islandController.GetAllIslands(w, r)
+	})
+
+	mux.HandleFunc("/api/islands/nearest", func(w http.ResponseWriter, r *http.Request) {
+		setCORS(w, "GET, OPTIONS")
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		if r.Method != http.MethodGet {
+			http.Error(w, "Método no permitido", http.StatusMethodNotAllowed)
+			return
+		}
+		islandController.GetNearestIsland(w, r)
+	})
+
+	mux.HandleFunc("/api/islands/region/", func(w http.ResponseWriter, r *http.Request) {
+		setCORS(w, "GET, OPTIONS")
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		if r.Method != http.MethodGet {
+			http.Error(w, "Método no permitido", http.StatusMethodNotAllowed)
+			return
+		}
+		islandController.GetIslandsByRegion(w, r)
+	})
+
+	mux.HandleFunc("/api/islands/", func(w http.ResponseWriter, r *http.Request) {
+		setCORS(w, "GET, OPTIONS")
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		if r.Method != http.MethodGet {
+			http.Error(w, "Método no permitido", http.StatusMethodNotAllowed)
+			return
+		}
+		islandController.GetIslandByID(w, r)
+	})
+
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/" {
 			http.NotFound(w, r)
@@ -101,4 +156,11 @@ func SetupRoutes(characterController *controller.CharacterController) http.Handl
 	})
 
 	return mux
+}
+
+// setCORS agrega los headers CORS estándar a la respuesta.
+func setCORS(w http.ResponseWriter, methods string) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", methods)
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 }

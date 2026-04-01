@@ -19,12 +19,16 @@ func main() {
 	config.InitFirebase()
 	defer config.CloseFirebase()
 
-	// Crear instancias (bottom-up: Repository → Service → Controller)
+	// Crear instancias (bottom-up: Repository → UseCase → Controller)
 	characterRepo := repository.NewCharacterRepository(config.FirestoreClient)
 	characterUsecase := usecase.NewCharacterUsecase(characterRepo)
 	characterController := controller.NewCharacterController(characterUsecase)
 
-	handler := router.SetupRoutes(characterController)
+	islandRepo := repository.NewIslandRepository()
+	islandUsecase := usecase.NewIslandUsecase(islandRepo)
+	islandController := controller.NewIslandController(islandUsecase)
+
+	handler := router.SetupRoutes(characterController, islandController)
 
 	createExampleData(characterUsecase)
 
@@ -45,7 +49,10 @@ func main() {
 	fmt.Println("  DELETE /api/characters/{id}         - Eliminar un personaje")
 	fmt.Println("  GET    /api/characters/search?name= - Buscar personajes")
 	fmt.Println("  GET    /api/characters/devil-fruits - Personajes con fruta del diablo")
-	fmt.Println("  GET    /health                      - Estado del servidor")
+	fmt.Println("  GET    /api/islands                       - Todas las islas del mundo")
+	fmt.Println("  GET    /api/islands/{id}                  - Detalle de una isla")
+	fmt.Println("  GET    /api/islands/nearest?x=&y=         - Isla más cercana (Quadtree)")
+	fmt.Println("  GET    /api/islands/region/{region}       - Islas por región")
 	fmt.Println("\n💡 Prueba con: curl http://localhost:8080/api/characters")
 	fmt.Println()
 

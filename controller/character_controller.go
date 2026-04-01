@@ -179,12 +179,7 @@ func (c *CharacterController) GetCharactersWithDevilFruit(w http.ResponseWriter,
 }
 
 func (c *CharacterController) sendError(w http.ResponseWriter, statusCode int, message string) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(statusCode)
-	json.NewEncoder(w).Encode(ErrorResponse{
-		Error:   http.StatusText(statusCode),
-		Message: message,
-	})
+	sendError(w, statusCode, message)
 }
 
 func (c *CharacterController) sendSuccess(w http.ResponseWriter, statusCode int, data interface{}, message string) {
