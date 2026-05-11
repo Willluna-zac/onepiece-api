@@ -45,7 +45,11 @@ func main() {
 	islandUsecase := usecase.NewIslandUsecase(islandRepo)
 	islandController := controller.NewIslandController(islandUsecase)
 
-	handler := router.SetupRoutes(characterController, islandController)
+	routeRepo := repository.NewRouteRepository()
+	routeUsecase := usecase.NewRouteUseCase(routeRepo, islandRepo)
+	routeController := controller.NewRouteController(routeUsecase)
+
+	handler := router.SetupRoutes(characterController, islandController, routeController)
 
 	createExampleData(characterUsecase)
 
@@ -70,6 +74,10 @@ func main() {
 	fmt.Println("  GET    /api/islands/{id}                  - Detalle de una isla")
 	fmt.Println("  GET    /api/islands/nearest?x=&y=         - Isla más cercana (Quadtree)")
 	fmt.Println("  GET    /api/islands/region/{region}       - Islas por región")
+	fmt.Println("  GET    /api/routes                        - Todas las rutas marítimas")
+	fmt.Println("  GET    /api/routes/from/{islandID}        - Rutas desde/hacia una isla")
+	fmt.Println("  GET    /api/routes/shortest?from=&to=     - Ruta más corta (Dijkstra)")
+	fmt.Println("  GET    /api/routes/reachable?from=&maxCost= - Islas alcanzables")
 	fmt.Println("\n💡 Prueba con: curl http://localhost:8080/api/characters")
 	fmt.Println()
 

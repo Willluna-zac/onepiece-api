@@ -20,3 +20,18 @@ type CharacterRepository interface {
 	// y luego carga solo los personajes que tienen fruta. O(M) donde M << N.
 	GetWithDevilFruit(ctx context.Context) ([]Character, error)
 }
+
+// RouteRepository define el contrato de persistencia para rutas marítimas.
+type RouteRepository interface {
+	GetAll(ctx context.Context) ([]Route, error)
+	GetByIsland(ctx context.Context, islandID string) ([]Route, error)
+}
+
+// RouteUseCase define la lógica de negocio para rutas marítimas y navegación.
+type RouteUseCase interface {
+	GetAllRoutes(ctx context.Context) ([]Route, error)
+	GetRoutesFromIsland(ctx context.Context, islandID string) ([]Route, error)
+	FindShortestPath(ctx context.Context, fromID, toID string, mode RouteMode) (*ShortestPathResponse, error)
+	FindReachableIslands(ctx context.Context, fromID string, maxCost float64) (*ReachableResponse, error)
+	GetGraphStats(ctx context.Context) (*GraphStats, error)
+}

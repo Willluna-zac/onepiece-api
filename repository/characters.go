@@ -25,6 +25,7 @@ type normalizedCharacter struct {
 	Species         string    `firestore:"species"`
 	Role            string    `firestore:"role"`
 	FirstAppearance string    `firestore:"firstAppearance"`
+	ImageURL        string    `firestore:"imageUrl,omitempty"`
 	Notes           string    `firestore:"notes,omitempty"`
 	MigratedAt      time.Time `firestore:"migratedAt"`
 }
@@ -74,6 +75,20 @@ var hakiTypeNames = map[string]string{
 type CharacterRepository struct {
 	client     *firestore.Client
 	collection string
+
+	// Cache en memoria para GetAllCharacters — evita 150+ queries a Firestore
+	// en cada request. Se invalida automáticamente al crear/actualizar/eliminar.
+	cacheMu      sync.RWMutex
+	cachedAll    []domain.Character
+	cacheExpires time.Time
+}
+
+const cacheTTL = 5 * time.Minute
+
+func (r *CharacterRepository) invalidateCache() {
+	r.cacheMu.Lock()
+	r.cachedAll = nil
+	r.cacheMu.Unlock()
 }
 
 // NewCharacterRepository crea una nueva instancia del repositorio
@@ -92,13 +107,11 @@ func NewCharacterRepository(client *firestore.Client) *CharacterRepository {
 
 // CreateCharacter crea un nuevo personaje en Firestore (dual-write)
 func (r *CharacterRepository) CreateCharacter(ctx context.Context, character *domain.Character) error {
-	// Escritura en colección original
 	_, err := r.client.Collection(r.collection).Doc(character.ID).Set(ctx, character)
 	if err != nil {
 		return err
 	}
-
-	// Dual-write: escribir también en colecciones normalizadas
+	r.invalidateCache()
 	return r.writeNormalized(ctx, character)
 }
 
@@ -113,6 +126,7 @@ func (r *CharacterRepository) assembleCharacter(ctx context.Context, base normal
 		Species:         base.Species,
 		Role:            base.Role,
 		FirstAppearance: base.FirstAppearance,
+		ImageURL:        base.ImageURL,
 		Notes:           base.Notes,
 	}
 
@@ -221,6 +235,16 @@ func (r *CharacterRepository) assembleCharacter(ctx context.Context, base normal
 
 // GetAllCharacters obtiene todos los personajes desde las colecciones normalizadas
 func (r *CharacterRepository) GetAllCharacters(ctx context.Context) ([]domain.Character, error) {
+	// Servir desde cache si está vigente
+	r.cacheMu.RLock()
+	if r.cachedAll != nil && time.Now().Before(r.cacheExpires) {
+		cached := r.cachedAll
+		r.cacheMu.RUnlock()
+		return cached, nil
+	}
+	r.cacheMu.RUnlock()
+
+	// Cache miss — consultar Firestore
 	var characters []domain.Character
 
 	iter := r.client.Collection("characters_new").Documents(ctx)
@@ -247,6 +271,12 @@ func (r *CharacterRepository) GetAllCharacters(ctx context.Context) ([]domain.Ch
 		characters = append(characters, char)
 	}
 
+	// Guardar en cache
+	r.cacheMu.Lock()
+	r.cachedAll = characters
+	r.cacheExpires = time.Now().Add(cacheTTL)
+	r.cacheMu.Unlock()
+
 	return characters, nil
 }
 
@@ -272,25 +302,21 @@ func (r *CharacterRepository) GetCharacterByID(ctx context.Context, id string) (
 
 // UpdateCharacter actualiza un personaje existente (dual-write)
 func (r *CharacterRepository) UpdateCharacter(ctx context.Context, character *domain.Character) error {
-	// Escritura en colección original
 	_, err := r.client.Collection(r.collection).Doc(character.ID).Set(ctx, character)
 	if err != nil {
 		return err
 	}
-
-	// Dual-write: sincronizar colecciones normalizadas
+	r.invalidateCache()
 	return r.writeNormalized(ctx, character)
 }
 
 // DeleteCharacter elimina un personaje (dual-write)
 func (r *CharacterRepository) DeleteCharacter(ctx context.Context, id string) error {
-	// Eliminar en colección original
 	_, err := r.client.Collection(r.collection).Doc(id).Delete(ctx)
 	if err != nil {
 		return err
 	}
-
-	// Dual-write: eliminar de colecciones normalizadas
+	r.invalidateCache()
 	return r.deleteNormalized(ctx, id)
 }
 
@@ -434,6 +460,7 @@ func (r *CharacterRepository) writeNormalized(ctx context.Context, character *do
 		Species:         character.Species,
 		Role:            character.Role,
 		FirstAppearance: character.FirstAppearance,
+		ImageURL:        character.ImageURL,
 		Notes:           character.Notes,
 		MigratedAt:      now,
 	}

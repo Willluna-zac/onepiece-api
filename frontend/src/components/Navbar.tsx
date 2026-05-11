@@ -4,6 +4,8 @@ const links = [
   { to: '/', label: '🏴‍☠️ Personajes' },
   { to: '/devil-fruits', label: '🍎 Devil Fruits' },
   { to: '/islands', label: '🗺️ Mapa de Islas' },
+  { to: '/routes', label: '⚓ Rutas' },
+  { to: '/stats', label: '📊 Análisis' },
 ]
 
 export function Navbar() {

@@ -1,8 +1,7 @@
 import { useState } from 'react'
-import { useIslands, useNearestIsland } from '../hooks/useApi'
+import { useIslands, useNearestIsland, useRoutes } from '../hooks/useApi'
 import { Loader, ErrorMsg } from '../components/Loader'
-import type { Island } from '../api/client'
-
+import { RouteMap } from '../components/RouteMap'
 const REGION_COLORS: Record<string, string> = {
   'East Blue':  'border-blue-500 bg-blue-900/20',
   'West Blue':  'border-indigo-500 bg-indigo-900/20',
@@ -21,76 +20,10 @@ const REGION_DOT: Record<string, string> = {
   'New World':  'bg-red-400',
 }
 
-// Simple SVG world map — islands plotted by (x/10000 * W, y/5000 * H)
-function WorldMap({ islands, nearest, onClick }: {
-  islands: Island[]
-  nearest?: Island
-  onClick: (x: number, y: number) => void
-}) {
-  const W = 700, H = 350
-
-  function handleClick(e: React.MouseEvent<SVGSVGElement>) {
-    const rect = e.currentTarget.getBoundingClientRect()
-    const px = ((e.clientX - rect.left) / rect.width) * 10000
-    const py = ((e.clientY - rect.top) / rect.height) * 5000
-    onClick(Math.round(px), Math.round(py))
-  }
-
-  return (
-    <div className="relative">
-      <p className="text-straw/50 text-xs mb-2">
-        🖱️ Haz clic en el mapa para encontrar la isla más cercana (Quadtree)
-      </p>
-      <svg
-        viewBox={`0 0 ${W} ${H}`}
-        className="w-full rounded-xl border border-gold/20 cursor-crosshair"
-        style={{ background: 'linear-gradient(180deg, #07111b 0%, #0d2340 50%, #07111b 100%)' }}
-        onClick={handleClick}
-      >
-        {/* Grand Line horizontal line */}
-        <line x1={0} y1={H / 2} x2={W} y2={H / 2} stroke="#f5c842" strokeOpacity={0.15} strokeWidth={1} strokeDasharray="6 4" />
-        {/* Red Line vertical barrier */}
-        <line x1={W / 2} y1={0} x2={W / 2} y2={H} stroke="#ef4444" strokeOpacity={0.15} strokeWidth={1} strokeDasharray="6 4" />
-
-        {/* Labels */}
-        <text x={8} y={14} fill="#60a5fa" fontSize={9} opacity={0.7}>East Blue</text>
-        <text x={W / 2 + 6} y={14} fill="#f87171" fontSize={9} opacity={0.7}>New World</text>
-        <text x={8} y={H - 6} fill="#34d399" fontSize={9} opacity={0.7}>South Blue</text>
-
-        {/* Islands */}
-        {islands.map(isl => {
-          const cx = (isl.x / 10000) * W
-          const cy = (isl.y / 5000) * H
-          const isNearest = nearest?.id === isl.id
-          return (
-            <g key={isl.id}>
-              <circle
-                cx={cx} cy={cy}
-                r={isNearest ? 8 : 5}
-                fill={isNearest ? '#f5c842' : '#1e6091'}
-                stroke={isNearest ? '#fbd96a' : '#2980b9'}
-                strokeWidth={isNearest ? 2 : 1}
-                opacity={0.9}
-              />
-              <text
-                x={cx + 7} y={cy + 4}
-                fill={isNearest ? '#f5c842' : '#e8d5b0'}
-                fontSize={isNearest ? 8 : 7}
-                fontWeight={isNearest ? 'bold' : 'normal'}
-                opacity={0.85}
-              >
-                {isl.name}
-              </text>
-            </g>
-          )
-        })}
-      </svg>
-    </div>
-  )
-}
 
 export default function IslandsPage() {
   const { data: islands, isLoading, error } = useIslands()
+  const { data: routes } = useRoutes()
   const [coords, setCoords] = useState<{ x: number; y: number } | null>(null)
   const [activeRegion, setActiveRegion] = useState<string | null>(null)
 
@@ -116,7 +49,15 @@ export default function IslandsPage() {
       {/* World Map */}
       {islands && (
         <div className="card mb-8">
-          <WorldMap islands={islands} nearest={nearest} onClick={(x, y) => setCoords({ x, y })} />
+          <p className="text-straw/50 text-xs mb-2">
+            🖱️ Haz clic en el mapa para encontrar la isla más cercana (Quadtree)
+          </p>
+          <RouteMap
+            islands={islands}
+            routes={routes ?? []}
+            nearestIsland={nearest}
+            onMapClick={(x: number, y: number) => setCoords({ x, y })}
+          />
           {coords && (
             <div className="mt-3 flex items-center gap-3 text-sm">
               <span className="text-straw/50">Punto seleccionado: ({coords.x}, {coords.y})</span>

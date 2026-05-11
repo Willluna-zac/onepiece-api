@@ -7,8 +7,16 @@
   },
   "variable": [
     { "key": "BASE_URL", "value": "http://localhost:8080" },
-    { "key": "CHARACTER_ID", "value": "f6a7ee99-e589-4e3c-8a95-8dba0c0765e2", "description": "Monkey D. Luffy — cámbialo al ID que necesites" },
-    { "key": "API_KEY", "value": "", "description": "Requerido para POST/PUT/DELETE — configura en tu environment" }
+    {
+      "key": "CHARACTER_ID",
+      "value": "f6a7ee99-e589-4e3c-8a95-8dba0c0765e2",
+      "description": "Monkey D. Luffy — cámbialo al ID que necesites"
+    },
+    {
+      "key": "API_KEY",
+      "value": "",
+      "description": "Requerido para POST/PUT/DELETE — configura en tu environment"
+    }
   ],
   "item": [
     {
@@ -95,9 +103,7 @@
           "request": {
             "method": "DELETE",
             "url": "{{BASE_URL}}/api/characters/{{CHARACTER_ID}}",
-            "header": [
-              { "key": "X-API-Key", "value": "{{API_KEY}}" }
-            ]
+            "header": [{ "key": "X-API-Key", "value": "{{API_KEY}}" }]
           }
         }
       ]
@@ -130,8 +136,16 @@
               "host": ["{{BASE_URL}}"],
               "path": ["api", "islands", "nearest"],
               "query": [
-                { "key": "x", "value": "1000", "description": "Longitud (0-10000)" },
-                { "key": "y", "value": "2600", "description": "Latitud (0-5000)" }
+                {
+                  "key": "x",
+                  "value": "1000",
+                  "description": "Longitud (0-10000)"
+                },
+                {
+                  "key": "y",
+                  "value": "2600",
+                  "description": "Latitud (0-5000)"
+                }
               ]
             },
             "description": "Usa el Quadtree para encontrar la isla más cercana en O(log n). Cambia x e y a cualquier coordenada."
@@ -156,6 +170,171 @@
           "request": {
             "method": "GET",
             "url": "{{BASE_URL}}/api/islands/region/New World"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Routes (Dijkstra)",
+      "item": [
+        {
+          "name": "GET All Routes",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/api/routes",
+            "description": "Lista todas las rutas marítimas registradas."
+          }
+        },
+        {
+          "name": "GET Routes From Island",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE_URL}}/api/routes/from/dawn-island",
+            "description": "Rutas donde la isla aparece como origen o destino."
+          }
+        },
+        {
+          "name": "GET Shortest Path — Fastest (default)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/routes/shortest?from=windmill-village&to=wano",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "routes", "shortest"],
+              "query": [
+                { "key": "from", "value": "windmill-village" },
+                { "key": "to", "value": "wano" }
+              ]
+            },
+            "description": "Dijkstra clásico: minimiza la suma de distancias. Sin parámetro 'mode' equivale a mode=fastest."
+          }
+        },
+        {
+          "name": "GET Shortest Path — Mode: fastest",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/routes/shortest?from=windmill-village&to=wano&mode=fastest",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "routes", "shortest"],
+              "query": [
+                { "key": "from", "value": "windmill-village" },
+                { "key": "to", "value": "wano" },
+                {
+                  "key": "mode",
+                  "value": "fastest",
+                  "description": "Suma de Distance"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Shortest Path — Mode: safest",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/routes/shortest?from=windmill-village&to=wano&mode=safest",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "routes", "shortest"],
+              "query": [
+                { "key": "from", "value": "windmill-village" },
+                { "key": "to", "value": "wano" },
+                {
+                  "key": "mode",
+                  "value": "safest",
+                  "description": "Minimax: minimiza el peor tramo (Danger)"
+                }
+              ]
+            },
+            "description": "totalCost = peligro del peor tramo del camino (1-5)."
+          }
+        },
+        {
+          "name": "GET Shortest Path — Mode: riskiest",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/routes/shortest?from=windmill-village&to=wano&mode=riskiest",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "routes", "shortest"],
+              "query": [
+                { "key": "from", "value": "windmill-village" },
+                { "key": "to", "value": "wano" },
+                {
+                  "key": "mode",
+                  "value": "riskiest",
+                  "description": "Maximin: maximiza el mejor tramo (Danger)"
+                }
+              ]
+            },
+            "description": "totalCost = peligro del mejor tramo del camino (1-5)."
+          }
+        },
+        {
+          "name": "GET Shortest Path — Mode: quickest",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/routes/shortest?from=windmill-village&to=wano&mode=quickest",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "routes", "shortest"],
+              "query": [
+                { "key": "from", "value": "windmill-village" },
+                { "key": "to", "value": "wano" },
+                {
+                  "key": "mode",
+                  "value": "quickest",
+                  "description": "Minimiza el tiempo total (TravelHours + LogPoseHours intermedios)"
+                }
+              ]
+            },
+            "description": "totalCost = totalTime (horas). Útil para comparar contra fastest: rutas largas en distancia pero con LogPose bajo pueden ser más rápidas."
+          }
+        },
+        {
+          "name": "GET Shortest Path — Invalid mode (400)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/routes/shortest?from=windmill-village&to=wano&mode=foo",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "routes", "shortest"],
+              "query": [
+                { "key": "from", "value": "windmill-village" },
+                { "key": "to", "value": "wano" },
+                { "key": "mode", "value": "foo" }
+              ]
+            },
+            "description": "Modo inválido debe responder 400."
+          }
+        },
+        {
+          "name": "GET Reachable Islands",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/routes/reachable?from=windmill-village&maxCost=2000",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "routes", "reachable"],
+              "query": [
+                { "key": "from", "value": "windmill-village" },
+                { "key": "maxCost", "value": "2000" }
+              ]
+            },
+            "description": "Islas alcanzables desde un origen con costo acumulado ≤ maxCost. Usa siempre Distance (modo fastest)."
+          }
+        },
+        {
+          "name": "GET Graph Stats (v3)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/routes/stats",
+              "host": ["{{BASE_URL}}"],
+              "path": ["api", "routes", "stats"]
+            },
+            "description": "Métricas estructurales del grafo: totales, componentes conexos, distribución de Danger y promedios. Cacheado 60s."
           }
         }
       ]

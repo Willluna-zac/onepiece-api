@@ -21,6 +21,9 @@ var allowedHosts = map[string]bool{
 	"static.wikia.nocookie.net": true,
 	"upload.wikimedia.org":      true,
 	"ui-avatars.com":            true,
+	"api.dicebear.com":          true,
+	"cdn.myanimelist.net":       true,
+	"myanimelist.net":           true,
 }
 
 // ProxyImage godoc

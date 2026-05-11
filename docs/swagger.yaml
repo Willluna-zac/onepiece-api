@@ -40,6 +40,8 @@ definitions:
         type: array
       id:
         type: string
+      imageUrl:
+        type: string
       name:
         type: string
       notes:
@@ -58,6 +60,33 @@ definitions:
       type:
         type: string
     type: object
+  domain.GraphStats:
+    properties:
+      avgDanger:
+        type: number
+      avgDistance:
+        type: number
+      avgTravelHours:
+        type: number
+      bidirectionalCount:
+        type: integer
+      connectedComponents:
+        type: integer
+      dangerHistogram:
+        description: DangerHistogram[i] = cantidad de rutas con Danger == i+1 (i en
+          [0..4]).
+        items:
+          type: integer
+        type: array
+      islandsWithLogPose:
+        type: integer
+      largestComponent:
+        type: integer
+      totalIslands:
+        type: integer
+      totalRoutes:
+        type: integer
+    type: object
   domain.HakiAbility:
     properties:
       awakened:
@@ -75,9 +104,11 @@ definitions:
         type: string
       id:
         type: string
+      logPoseHours:
+        type: number
       name:
         type: string
-      notable_characters:
+      notableCharacters:
         items:
           type: string
         type: array
@@ -87,6 +118,112 @@ definitions:
         type: number
       "y":
         type: number
+    type: object
+  domain.PathStep:
+    properties:
+      bestDangerSoFar:
+        type: integer
+      costSoFar:
+        type: number
+      distanceSoFar:
+        type: number
+      islandId:
+        type: string
+      islandName:
+        type: string
+      timeSoFar:
+        type: number
+      worstDangerSoFar:
+        type: integer
+    type: object
+  domain.ReachableIsland:
+    properties:
+      cost:
+        type: number
+      islandId:
+        type: string
+      islandName:
+        type: string
+    type: object
+  domain.ReachableResponse:
+    properties:
+      from:
+        type: string
+      islands:
+        items:
+          $ref: '#/definitions/domain.ReachableIsland'
+        type: array
+      maxCost:
+        type: number
+    type: object
+  domain.Route:
+    properties:
+      bidirectional:
+        type: boolean
+      danger:
+        description: 1-5
+        type: integer
+      distance:
+        type: number
+      fromIsland:
+        type: string
+      id:
+        type: string
+      notes:
+        type: string
+      toIsland:
+        type: string
+      travelHours:
+        type: number
+      weight:
+        description: |-
+          Deprecated: Weight es un peso precalculado heredado del primer Dijkstra
+          (Distance * DangerMultiplier(Danger)). Los modos de busqueda actuales
+          (fastest/safest/riskiest/quickest) calculan el peso dinamicamente desde
+          Distance, TravelHours o Danger segun el modo. Se conserva para no migrar
+          Firestore; no usar en codigo nuevo.
+        type: number
+    type: object
+  domain.RouteMode:
+    enum:
+    - fastest
+    - quickest
+    - safest
+    - riskiest
+    type: string
+    x-enum-varnames:
+    - RouteModeFastest
+    - RouteModeQuickest
+    - RouteModeSafest
+    - RouteModeRiskiest
+  domain.ShortestPathResponse:
+    properties:
+      bestDanger:
+        type: integer
+      found:
+        type: boolean
+      from:
+        type: string
+      hops:
+        type: integer
+      mode:
+        $ref: '#/definitions/domain.RouteMode'
+      path:
+        items:
+          $ref: '#/definitions/domain.PathStep'
+        type: array
+      to:
+        type: string
+      totalCost:
+        description: TotalCost (legacy) refleja la metrica del modo activo.
+        type: number
+      totalDistance:
+        description: Metricas globales del camino encontrado. Siempre presentes.
+        type: number
+      totalTime:
+        type: number
+      worstDanger:
+        type: integer
     type: object
 host: localhost:8080
 info:
@@ -408,6 +545,186 @@ paths:
       summary: Islas por región
       tags:
       - islands
+  /api/proxy/image:
+    get:
+      description: Descarga una imagen desde una URL externa y la sirve al cliente,
+        evitando CORS y hotlink protection
+      parameters:
+      - description: URL de la imagen a proxear
+        in: query
+        name: url
+        required: true
+        type: string
+      produces:
+      - image/png
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "502":
+          description: Bad Gateway
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Proxy de imagen externa
+      tags:
+      - proxy
+  /api/routes:
+    get:
+      description: Retorna todas las rutas marítimas registradas en Firestore
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Route'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.ErrorResponse'
+      summary: Listar rutas marítimas
+      tags:
+      - routes
+  /api/routes/from/{islandID}:
+    get:
+      description: Retorna todas las rutas en las que la isla indicada participa como
+        origen o destino
+      parameters:
+      - description: ID de la isla
+        in: path
+        name: islandID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Route'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.ErrorResponse'
+      summary: Rutas desde/hacia una isla
+      tags:
+      - routes
+  /api/routes/reachable:
+    get:
+      description: Retorna todas las islas alcanzables desde el origen cuyo costo
+        (suma de distancias) sea menor o igual a maxCost. Usa Dijkstra (modo fastest).
+      parameters:
+      - description: ID de la isla origen
+        in: query
+        name: from
+        required: true
+        type: string
+      - description: Costo máximo permitido
+        in: query
+        name: maxCost
+        required: true
+        type: number
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.ReachableResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.ErrorResponse'
+      summary: Islas alcanzables
+      tags:
+      - routes
+  /api/routes/shortest:
+    get:
+      description: |-
+        Calcula la ruta óptima entre dos islas según el modo elegido.
+        - **fastest** (default): minimiza la suma de distancias.
+        - **quickest**: minimiza el tiempo total (TravelHours de rutas + LogPoseHours de islas intermedias).
+        - **safest**: minimiza el peligro del peor tramo (minimax sobre Danger).
+        - **riskiest**: maximiza el peligro del mejor tramo (maximin sobre Danger).
+        La respuesta SIEMPRE incluye las 4 métricas globales (`totalDistance`, `totalTime`, `worstDanger`, `bestDanger`) calculadas sobre el camino encontrado, independientemente del modo.
+        El campo legacy `totalCost` refleja la métrica del modo activo (clientes nuevos deberían usar las 4 explícitas).
+      parameters:
+      - description: ID de la isla origen
+        in: query
+        name: from
+        required: true
+        type: string
+      - description: ID de la isla destino
+        in: query
+        name: to
+        required: true
+        type: string
+      - default: fastest
+        description: Modo de búsqueda
+        enum:
+        - fastest
+        - quickest
+        - safest
+        - riskiest
+        in: query
+        name: mode
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.ShortestPathResponse'
+        "400":
+          description: Parámetros faltantes o modo inválido
+          schema:
+            $ref: '#/definitions/controller.ErrorResponse'
+        "404":
+          description: No existe ruta navegable
+          schema:
+            $ref: '#/definitions/controller.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.ErrorResponse'
+      summary: Ruta más corta (Dijkstra)
+      tags:
+      - routes
+  /api/routes/stats:
+    get:
+      description: |-
+        Retorna metricas estructurales del grafo: totales, promedios (distancia, tiempo, danger), distribucion de Danger por nivel (1-5) y numero de componentes conectados.
+        Util para visualizar la salud del seed y construir vistas de analisis.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.GraphStats'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.ErrorResponse'
+      summary: Estadisticas del grafo
+      tags:
+      - routes
 securityDefinitions:
   ApiKeyAuth:
     description: Requerido para POST, PUT y DELETE. Configura la variable de entorno

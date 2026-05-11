@@ -511,6 +511,258 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/proxy/image": {
+            "get": {
+                "description": "Descarga una imagen desde una URL externa y la sirve al cliente, evitando CORS y hotlink protection",
+                "produces": [
+                    "image/png"
+                ],
+                "tags": [
+                    "proxy"
+                ],
+                "summary": "Proxy de imagen externa",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "URL de la imagen a proxear",
+                        "name": "url",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "502": {
+                        "description": "Bad Gateway",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/routes": {
+            "get": {
+                "description": "Retorna todas las rutas marítimas registradas en Firestore",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "routes"
+                ],
+                "summary": "Listar rutas marítimas",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.Route"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/routes/from/{islandID}": {
+            "get": {
+                "description": "Retorna todas las rutas en las que la isla indicada participa como origen o destino",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "routes"
+                ],
+                "summary": "Rutas desde/hacia una isla",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID de la isla",
+                        "name": "islandID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.Route"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/routes/reachable": {
+            "get": {
+                "description": "Retorna todas las islas alcanzables desde el origen cuyo costo (suma de distancias) sea menor o igual a maxCost. Usa Dijkstra (modo fastest).",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "routes"
+                ],
+                "summary": "Islas alcanzables",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID de la isla origen",
+                        "name": "from",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "Costo máximo permitido",
+                        "name": "maxCost",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ReachableResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/routes/shortest": {
+            "get": {
+                "description": "Calcula la ruta óptima entre dos islas según el modo elegido.\n- **fastest** (default): minimiza la suma de distancias.\n- **quickest**: minimiza el tiempo total (TravelHours de rutas + LogPoseHours de islas intermedias).\n- **safest**: minimiza el peligro del peor tramo (minimax sobre Danger).\n- **riskiest**: maximiza el peligro del mejor tramo (maximin sobre Danger).\nLa respuesta SIEMPRE incluye las 4 métricas globales (` + "`" + `totalDistance` + "`" + `, ` + "`" + `totalTime` + "`" + `, ` + "`" + `worstDanger` + "`" + `, ` + "`" + `bestDanger` + "`" + `) calculadas sobre el camino encontrado, independientemente del modo.\nEl campo legacy ` + "`" + `totalCost` + "`" + ` refleja la métrica del modo activo (clientes nuevos deberían usar las 4 explícitas).",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "routes"
+                ],
+                "summary": "Ruta más corta (Dijkstra)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID de la isla origen",
+                        "name": "from",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ID de la isla destino",
+                        "name": "to",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "fastest",
+                            "quickest",
+                            "safest",
+                            "riskiest"
+                        ],
+                        "type": "string",
+                        "default": "fastest",
+                        "description": "Modo de búsqueda",
+                        "name": "mode",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ShortestPathResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Parámetros faltantes o modo inválido",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "No existe ruta navegable",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/routes/stats": {
+            "get": {
+                "description": "Retorna metricas estructurales del grafo: totales, promedios (distancia, tiempo, danger), distribucion de Danger por nivel (1-5) y numero de componentes conectados.\nUtil para visualizar la salud del seed y construir vistas de analisis.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "routes"
+                ],
+                "summary": "Estadisticas del grafo",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.GraphStats"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -575,6 +827,9 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "imageUrl": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -600,6 +855,45 @@ const docTemplate = `{
                 },
                 "type": {
                     "type": "string"
+                }
+            }
+        },
+        "domain.GraphStats": {
+            "type": "object",
+            "properties": {
+                "avgDanger": {
+                    "type": "number"
+                },
+                "avgDistance": {
+                    "type": "number"
+                },
+                "avgTravelHours": {
+                    "type": "number"
+                },
+                "bidirectionalCount": {
+                    "type": "integer"
+                },
+                "connectedComponents": {
+                    "type": "integer"
+                },
+                "dangerHistogram": {
+                    "description": "DangerHistogram[i] = cantidad de rutas con Danger == i+1 (i en [0..4]).",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "islandsWithLogPose": {
+                    "type": "integer"
+                },
+                "largestComponent": {
+                    "type": "integer"
+                },
+                "totalIslands": {
+                    "type": "integer"
+                },
+                "totalRoutes": {
+                    "type": "integer"
                 }
             }
         },
@@ -629,10 +923,13 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "logPoseHours": {
+                    "type": "number"
+                },
                 "name": {
                     "type": "string"
                 },
-                "notable_characters": {
+                "notableCharacters": {
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -646,6 +943,155 @@ const docTemplate = `{
                 },
                 "y": {
                     "type": "number"
+                }
+            }
+        },
+        "domain.PathStep": {
+            "type": "object",
+            "properties": {
+                "bestDangerSoFar": {
+                    "type": "integer"
+                },
+                "costSoFar": {
+                    "type": "number"
+                },
+                "distanceSoFar": {
+                    "type": "number"
+                },
+                "islandId": {
+                    "type": "string"
+                },
+                "islandName": {
+                    "type": "string"
+                },
+                "timeSoFar": {
+                    "type": "number"
+                },
+                "worstDangerSoFar": {
+                    "type": "integer"
+                }
+            }
+        },
+        "domain.ReachableIsland": {
+            "type": "object",
+            "properties": {
+                "cost": {
+                    "type": "number"
+                },
+                "islandId": {
+                    "type": "string"
+                },
+                "islandName": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.ReachableResponse": {
+            "type": "object",
+            "properties": {
+                "from": {
+                    "type": "string"
+                },
+                "islands": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/domain.ReachableIsland"
+                    }
+                },
+                "maxCost": {
+                    "type": "number"
+                }
+            }
+        },
+        "domain.Route": {
+            "type": "object",
+            "properties": {
+                "bidirectional": {
+                    "type": "boolean"
+                },
+                "danger": {
+                    "description": "1-5",
+                    "type": "integer"
+                },
+                "distance": {
+                    "type": "number"
+                },
+                "fromIsland": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "toIsland": {
+                    "type": "string"
+                },
+                "travelHours": {
+                    "type": "number"
+                },
+                "weight": {
+                    "description": "Deprecated: Weight es un peso precalculado heredado del primer Dijkstra\n(Distance * DangerMultiplier(Danger)). Los modos de busqueda actuales\n(fastest/safest/riskiest/quickest) calculan el peso dinamicamente desde\nDistance, TravelHours o Danger segun el modo. Se conserva para no migrar\nFirestore; no usar en codigo nuevo.",
+                    "type": "number"
+                }
+            }
+        },
+        "domain.RouteMode": {
+            "type": "string",
+            "enum": [
+                "fastest",
+                "quickest",
+                "safest",
+                "riskiest"
+            ],
+            "x-enum-varnames": [
+                "RouteModeFastest",
+                "RouteModeQuickest",
+                "RouteModeSafest",
+                "RouteModeRiskiest"
+            ]
+        },
+        "domain.ShortestPathResponse": {
+            "type": "object",
+            "properties": {
+                "bestDanger": {
+                    "type": "integer"
+                },
+                "found": {
+                    "type": "boolean"
+                },
+                "from": {
+                    "type": "string"
+                },
+                "hops": {
+                    "type": "integer"
+                },
+                "mode": {
+                    "$ref": "#/definitions/domain.RouteMode"
+                },
+                "path": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/domain.PathStep"
+                    }
+                },
+                "to": {
+                    "type": "string"
+                },
+                "totalCost": {
+                    "description": "TotalCost (legacy) refleja la metrica del modo activo.",
+                    "type": "number"
+                },
+                "totalDistance": {
+                    "description": "Metricas globales del camino encontrado. Siempre presentes.",
+                    "type": "number"
+                },
+                "totalTime": {
+                    "type": "number"
+                },
+                "worstDanger": {
+                    "type": "integer"
                 }
             }
         }

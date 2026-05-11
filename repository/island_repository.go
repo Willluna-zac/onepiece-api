@@ -75,157 +75,211 @@ func (r *IslandRepository) seed() {
 	islands := []*domain.Island{
 		{
 			ID: "windmill-village", Name: "Windmill Village", Region: "East Blue",
-			Description:       "Pueblo costero del Reino Goa donde Luffy creció y comenzó su viaje pirata.",
-			X: 500, Y: 1800, NotableCharacters: []string{"Luffy", "Shanks", "Coby"},
+			Description: "Pueblo costero del Reino Goa donde Luffy creció y comenzó su viaje pirata.",
+			X:           500, Y: 1800, NotableCharacters: []string{"Luffy", "Shanks", "Coby"},
 		},
 		{
 			ID: "shells-town", Name: "Shells Town", Region: "East Blue",
-			Description:       "Base marina donde Luffy recluta a Zoro de su ejecución en la jaula.",
-			X: 700, Y: 2200, NotableCharacters: []string{"Zoro", "Coby", "Morgan"},
+			Description: "Base marina donde Luffy recluta a Zoro de su ejecución en la jaula.",
+			X:           700, Y: 2200, NotableCharacters: []string{"Zoro", "Coby", "Morgan"},
 		},
 		{
 			ID: "orange-town", Name: "Orange Town", Region: "East Blue",
-			Description:       "Primera villa atacada por los Straw Hats, donde se encuentran con Buggy el Payaso.",
-			X: 900, Y: 2100, NotableCharacters: []string{"Buggy", "Nami"},
+			Description: "Primera villa atacada por los Straw Hats, donde se encuentran con Buggy el Payaso.",
+			X:           900, Y: 2100, NotableCharacters: []string{"Buggy", "Nami"},
 		},
 		{
 			ID: "syrup-village", Name: "Syrup Village", Region: "East Blue",
-			Description:       "Tranquilo pueblo donde Usopp vive y se une a la tripulación del Sombrero de Paja.",
-			X: 1100, Y: 2000, NotableCharacters: []string{"Usopp", "Kaya"},
+			Description: "Tranquilo pueblo donde Usopp vive y se une a la tripulación del Sombrero de Paja.",
+			X:           1100, Y: 2000, NotableCharacters: []string{"Usopp", "Kaya"},
 		},
 		{
 			ID: "baratie", Name: "Baratie", Region: "East Blue",
-			Description:       "Famoso restaurante flotante donde trabaja Sanji, que sueña con encontrar el All Blue.",
-			X: 1400, Y: 2300, NotableCharacters: []string{"Sanji", "Zeff", "Gin"},
+			Description: "Famoso restaurante flotante donde trabaja Sanji, que sueña con encontrar el All Blue.",
+			X:           1400, Y: 2300, NotableCharacters: []string{"Sanji", "Zeff", "Gin"},
 		},
 		{
 			ID: "arlong-park", Name: "Arlong Park", Region: "East Blue",
-			Description:       "Fortaleza del tiburón humano Arlong, donde Nami estuvo esclavizada durante años.",
-			X: 1600, Y: 1900, NotableCharacters: []string{"Nami", "Arlong"},
+			Description: "Fortaleza del tiburón humano Arlong, donde Nami estuvo esclavizada durante años.",
+			X:           1600, Y: 1900, NotableCharacters: []string{"Nami", "Arlong"},
 		},
 		{
 			ID: "loguetown", Name: "Loguetown", Region: "East Blue",
-			Description:       "La Ciudad del Principio y el Fin: lugar de nacimiento y ejecución de Gol D. Roger.",
-			X: 1900, Y: 2500, NotableCharacters: []string{"Luffy", "Buggy", "Smoker"},
+			Description: "La Ciudad del Principio y el Fin: lugar de nacimiento y ejecución de Gol D. Roger.",
+			X:           1900, Y: 2500, NotableCharacters: []string{"Luffy", "Buggy", "Smoker"},
 		},
 		{
 			ID: "reverse-mountain", Name: "Reverse Mountain", Region: "Grand Line",
-			Description:       "Entrada a la Grand Line: los barcos suben la corriente y se lanzan hacia el mar interior.",
-			X: 2100, Y: 2500, NotableCharacters: []string{"Crocus", "Laboon"},
+			Description: "Entrada a la Grand Line: los barcos suben la corriente y se lanzan hacia el mar interior.",
+			X:           2100, Y: 2500, NotableCharacters: []string{"Crocus", "Laboon"},
 		},
 		{
 			ID: "whiskey-peak", Name: "Whiskey Peak", Region: "Grand Line",
-			Description:       "Pueblo desértico donde los cazarrecompensas se disfrazan de anfitriones para atacar piratas.",
-			X: 2500, Y: 2100, NotableCharacters: []string{"Igaram", "Zoro"},
+			Description: "Pueblo desértico donde los cazarrecompensas se disfrazan de anfitriones para atacar piratas.",
+			X:           2500, Y: 2100, NotableCharacters: []string{"Igaram", "Zoro"},
 		},
 		{
 			ID: "little-garden", Name: "Little Garden", Region: "Grand Line",
-			Description:       "Isla prehistórica con criaturas gigantes donde dos gigantes llevan un duelo eterno.",
-			X: 2800, Y: 2600, NotableCharacters: []string{"Dorry", "Brogy"},
+			Description: "Isla prehistórica con criaturas gigantes donde dos gigantes llevan un duelo eterno.",
+			X:           2800, Y: 2600, NotableCharacters: []string{"Dorry", "Brogy"},
 		},
 		{
 			ID: "drum-island", Name: "Drum Island", Region: "Grand Line",
-			Description:       "Reino nevado con el médico más habilidoso del mundo; donde Chopper se une a la tripulación.",
-			X: 3000, Y: 2400, NotableCharacters: []string{"Chopper", "Dalton", "Wapol"},
+			Description: "Reino nevado con el médico más habilidoso del mundo; donde Chopper se une a la tripulación.",
+			X:           3000, Y: 2400, NotableCharacters: []string{"Chopper", "Dalton", "Wapol"},
 		},
 		{
 			ID: "alabasta", Name: "Alabasta", Region: "Grand Line",
-			Description:       "Vasto reino desértico al borde de la guerra civil, salvado por los Straw Hats de Crocodile.",
-			X: 3200, Y: 2300, NotableCharacters: []string{"Vivi", "Crocodile", "Luffy"},
+			Description: "Vasto reino desértico al borde de la guerra civil, salvado por los Straw Hats de Crocodile.",
+			X:           3200, Y: 2300, NotableCharacters: []string{"Vivi", "Crocodile", "Luffy"},
 		},
 		{
 			ID: "jaya", Name: "Jaya", Region: "Grand Line",
-			Description:       "Refugio de piratas donde Luffy se entera de Sky Island y enfrenta a Bellamy.",
-			X: 3600, Y: 2200, NotableCharacters: []string{"Bellamy", "Luffy", "Blackbeard"},
+			Description: "Refugio de piratas donde Luffy se entera de Sky Island y enfrenta a Bellamy.",
+			X:           3600, Y: 2200, NotableCharacters: []string{"Bellamy", "Luffy", "Blackbeard"},
 		},
 		{
 			ID: "skypiea", Name: "Skypiea", Region: "Sky Islands",
-			Description:       "Isla celeste flotando sobre las nubes, gobernada por el dios autoproclamado Enel.",
-			X: 3800, Y: 4800, NotableCharacters: []string{"Enel", "Nami", "Zoro"},
+			Description: "Isla celeste flotando sobre las nubes, gobernada por el dios autoproclamado Enel.",
+			X:           3800, Y: 4800, NotableCharacters: []string{"Enel", "Nami", "Zoro"},
 		},
 		{
 			ID: "long-ring-long-land", Name: "Long Ring Long Land", Region: "Grand Line",
-			Description:       "Isla alargada y peculiar donde los Straw Hats compiten en el Davy Back Fight contra Foxy.",
-			X: 4000, Y: 2400, NotableCharacters: []string{"Foxy", "Luffy"},
+			Description: "Isla alargada y peculiar donde los Straw Hats compiten en el Davy Back Fight contra Foxy.",
+			X:           4000, Y: 2400, NotableCharacters: []string{"Foxy", "Luffy"},
 		},
 		{
 			ID: "water-7", Name: "Water 7", Region: "Grand Line",
-			Description:       "Ciudad flotante famosa por la construcción de barcos; donde Usopp abandona temporalmente la tripulación.",
-			X: 4300, Y: 2700, NotableCharacters: []string{"Franky", "Iceburg", "Rob Lucci"},
+			Description: "Ciudad flotante famosa por la construcción de barcos; donde Usopp abandona temporalmente la tripulación.",
+			X:           4300, Y: 2700, NotableCharacters: []string{"Franky", "Iceburg", "Rob Lucci"},
 		},
 		{
 			ID: "enies-lobby", Name: "Enies Lobby", Region: "Grand Line",
-			Description:       "Fortaleza judicial del Gobierno Mundial donde los Straw Hats rescatan a Robin y le declaran la guerra.",
-			X: 4600, Y: 2600, NotableCharacters: []string{"Rob Lucci", "Spandam", "Luffy"},
+			Description: "Fortaleza judicial del Gobierno Mundial donde los Straw Hats rescatan a Robin y le declaran la guerra.",
+			X:           4600, Y: 2600, NotableCharacters: []string{"Rob Lucci", "Spandam", "Luffy"},
 		},
 		{
 			ID: "thriller-bark", Name: "Thriller Bark", Region: "Grand Line",
-			Description:       "Inmenso barco fantasma del Warlord Gecko Moriah; donde Brook se une a la tripulación.",
-			X: 4800, Y: 2800, NotableCharacters: []string{"Gecko Moriah", "Brook", "Luffy"},
+			Description: "Inmenso barco fantasma del Warlord Gecko Moriah; donde Brook se une a la tripulación.",
+			X:           4800, Y: 2800, NotableCharacters: []string{"Gecko Moriah", "Brook", "Luffy"},
 		},
 		{
 			ID: "sabaody-archipelago", Name: "Sabaody Archipelago", Region: "Grand Line",
-			Description:       "Archipiélago de manglares burbujeantes donde la tripulación es separada por Bartholomew Kuma.",
-			X: 4900, Y: 2500, NotableCharacters: []string{"Rayleigh", "Bartholomew Kuma", "Luffy"},
+			Description: "Archipiélago de manglares burbujeantes donde la tripulación es separada por Bartholomew Kuma.",
+			X:           4900, Y: 2500, NotableCharacters: []string{"Rayleigh", "Bartholomew Kuma", "Luffy"},
 		},
 		{
 			ID: "amazon-lily", Name: "Amazon Lily", Region: "New World",
-			Description:       "Isla de guerreras amazonas gobernada por Boa Hancock, donde Luffy aterriza tras la separación.",
-			X: 5300, Y: 1200, NotableCharacters: []string{"Boa Hancock", "Luffy"},
+			Description: "Isla de guerreras amazonas gobernada por Boa Hancock, donde Luffy aterriza tras la separación.",
+			X:           5300, Y: 1200, NotableCharacters: []string{"Boa Hancock", "Luffy"},
 		},
 		{
 			ID: "impel-down", Name: "Impel Down", Region: "Red Line",
-			Description:       "La mayor prisión subterránea del mundo, asaltada por Luffy para rescatar a Ace.",
-			X: 5000, Y: 1800, NotableCharacters: []string{"Magellan", "Luffy", "Ace"},
+			Description: "La mayor prisión subterránea del mundo, asaltada por Luffy para rescatar a Ace.",
+			X:           5000, Y: 1800, NotableCharacters: []string{"Magellan", "Luffy", "Ace"},
 		},
 		{
 			ID: "marineford", Name: "Marineford", Region: "Red Line",
-			Description:       "Cuartel general de la Marina donde se libra la mayor guerra del anime: la batalla de Marineford.",
-			X: 5000, Y: 2400, NotableCharacters: []string{"Sengoku", "Whitebeard", "Luffy", "Ace"},
+			Description: "Cuartel general de la Marina donde se libra la mayor guerra del anime: la batalla de Marineford.",
+			X:           5000, Y: 2400, NotableCharacters: []string{"Sengoku", "Whitebeard", "Luffy", "Ace"},
 		},
 		{
 			ID: "fishman-island", Name: "Fish-Man Island", Region: "New World",
-			Description:       "Isla submarina gobernada por el rey Neptuno; Luffy protege a los peces-hombre del racismo.",
-			X: 5500, Y: 2300, NotableCharacters: []string{"Shirahoshi", "King Neptune", "Luffy"},
+			Description: "Isla submarina gobernada por el rey Neptuno; Luffy protege a los peces-hombre del racismo.",
+			X:           5500, Y: 2300, NotableCharacters: []string{"Shirahoshi", "King Neptune", "Luffy"},
 		},
 		{
 			ID: "punk-hazard", Name: "Punk Hazard", Region: "New World",
-			Description:       "Isla devastada mitad fuego mitad hielo, base experimental del científico Vegapunk.",
-			X: 5800, Y: 2600, NotableCharacters: []string{"Smoker", "Doflamingo", "Caesar Clown"},
+			Description: "Isla devastada mitad fuego mitad hielo, base experimental del científico Vegapunk.",
+			X:           5800, Y: 2600, NotableCharacters: []string{"Smoker", "Doflamingo", "Caesar Clown"},
 		},
 		{
 			ID: "dressrosa", Name: "Dressrosa", Region: "New World",
-			Description:       "Reino convertido en tierra de juguetes por Doflamingo, liberado tras la batalla del Coliseo.",
-			X: 6200, Y: 2200, NotableCharacters: []string{"Doflamingo", "Rebecca", "Luffy"},
+			Description: "Reino convertido en tierra de juguetes por Doflamingo, liberado tras la batalla del Coliseo.",
+			X:           6200, Y: 2200, NotableCharacters: []string{"Doflamingo", "Rebecca", "Luffy"},
 		},
 		{
 			ID: "zou", Name: "Zou", Region: "New World",
-			Description:       "Isla viviente sobre el lomo de un elefante milenario, hogar de la tribu Mink.",
-			X: 6600, Y: 2900, NotableCharacters: []string{"Inuarashi", "Nekomamushi", "Luffy"},
+			Description: "Isla viviente sobre el lomo de un elefante milenario, hogar de la tribu Mink.",
+			X:           6600, Y: 2900, NotableCharacters: []string{"Inuarashi", "Nekomamushi", "Luffy"},
 		},
 		{
 			ID: "whole-cake-island", Name: "Whole Cake Island", Region: "New World",
-			Description:       "Isla-tarta sede del Imperio Totto Land de la Emperatriz Big Mom; donde Luffy rescata a Sanji.",
-			X: 6800, Y: 3100, NotableCharacters: []string{"Big Mom", "Sanji", "Luffy"},
+			Description: "Isla-tarta sede del Imperio Totto Land de la Emperatriz Big Mom; donde Luffy rescata a Sanji.",
+			X:           6800, Y: 3100, NotableCharacters: []string{"Big Mom", "Sanji", "Luffy"},
 		},
 		{
 			ID: "wano", Name: "Wano Country", Region: "New World",
-			Description:       "País de samuráis aislado del mundo bajo el yugo del Emperador Kaido, liberado por Luffy.",
-			X: 7200, Y: 2700, NotableCharacters: []string{"Kaido", "Momonosuke", "Luffy", "Zoro"},
+			Description: "País de samuráis aislado del mundo bajo el yugo del Emperador Kaido, liberado por Luffy.",
+			X:           7200, Y: 2700, NotableCharacters: []string{"Kaido", "Momonosuke", "Luffy", "Zoro"},
 		},
 		{
 			ID: "elbaf", Name: "Elbaf", Region: "New World",
-			Description:       "Legendaria tierra de los gigantes, soñada por Usopp desde niño.",
-			X: 7600, Y: 4200, NotableCharacters: []string{"Hajrudin", "Luffy"},
+			Description: "Legendaria tierra de los gigantes, soñada por Usopp desde niño.",
+			X:           7600, Y: 4200, NotableCharacters: []string{"Hajrudin", "Luffy"},
 		},
 		{
 			ID: "laugh-tale", Name: "Laugh Tale", Region: "New World",
-			Description:       "La isla final de la Grand Line donde Gol D. Roger dejó el One Piece.",
-			X: 8800, Y: 2500, NotableCharacters: []string{"Gol D. Roger", "Luffy"},
+			Description: "La isla final de la Grand Line donde Gol D. Roger dejó el One Piece.",
+			X:           8800, Y: 2500, NotableCharacters: []string{"Gol D. Roger", "Luffy"},
+		},
+		{
+			ID: "kano-country", Name: "Kano Country", Region: "North Blue",
+			Description: "País guerrero del North Blue famoso por sus luchadores y su tradición marcial.",
+			X:           800, Y: 3200, NotableCharacters: []string{"Chinjao", "Sai", "Boo"},
+		},
+		{
+			ID: "banaro-island", Name: "Banaro Island", Region: "Grand Line",
+			Description: "Isla de la Grand Line donde se enfrentaron Shanks y Barba Negra en un duelo legendario.",
+			X:           3400, Y: 1500, NotableCharacters: []string{"Shanks", "Blackbeard"},
 		},
 	}
 
+	// Asignar LogPoseHours por isla. Valores plausibles según lore:
+	//   - East Blue / North Blue / Red Line: 0 (no se usa Log Pose).
+	//   - Reverse Mountain / Loguetown: 0 (puntos de tránsito, no asentamiento).
+	//   - Grand Line: 5–72.
+	//   - New World: 24–96 (Wano legendariamente lento).
+	//   - Sky Islands: 12.
+	//   - Laugh Tale: 0 (destino final).
+	logPose := map[string]float64{
+		// East Blue (no Log Pose)
+		"windmill-village": 0, "shells-town": 0, "orange-town": 0,
+		"syrup-village": 0, "baratie": 0, "arlong-park": 0, "loguetown": 0,
+		// North Blue
+		"kano-country": 0,
+		// Red Line / puntos de tránsito
+		"reverse-mountain": 0, "marineford": 0, "impel-down": 0,
+		// Grand Line
+		"whiskey-peak":        5,
+		"little-garden":       24,
+		"drum-island":         72, // 3 días de espera, lore-fiel
+		"alabasta":            24,
+		"jaya":                24,
+		"long-ring-long-land": 12,
+		"water-7":             24,
+		"enies-lobby":         0, // fortaleza, no se asienta el Log Pose
+		"thriller-bark":       12,
+		"sabaody-archipelago": 6, // cerca de la Red Line
+		"banaro-island":       24,
+		// Sky Islands
+		"skypiea": 12,
+		// New World
+		"amazon-lily":       24,
+		"fishman-island":    24,
+		"punk-hazard":       48,
+		"dressrosa":         24,
+		"zou":               48, // isla móvil, Log Pose complicado
+		"whole-cake-island": 36,
+		"wano":              96, // aislado, Log Pose enorme
+		"elbaf":             72,
+		"laugh-tale":        0, // destino final
+	}
+
 	for _, island := range islands {
+		if h, ok := logPose[island.ID]; ok {
+			island.LogPoseHours = h
+		}
 		r.islands[island.ID] = island
 		r.qt.Insert(quadtree.Point{X: island.X, Y: island.Y, Data: island})
 	}

@@ -130,6 +130,84 @@ http://localhost:8080
 - **GET `/api/characters/devil-fruits`**  
   Returns only characters that have a devil fruit.
 
+### Routes & Islands (v2 — Dijkstra con 4 modos)
+
+El motor de rutas modela el mundo como un grafo: **islas = nodos**, **rutas = aristas**. Cada arista carga 3 métricas (`distance`, `travelHours`, `danger 1–5`) y cada isla un `logPoseHours` (espera del Log Pose). El endpoint principal acepta 4 **modos** que optimizan distintos objetivos pero retornan **siempre las mismas 4 métricas globales**.
+
+- **GET `/api/islands`** — todas las islas, con `logPoseHours`.
+- **GET `/api/routes`** — todas las rutas, con `distance`/`travelHours`/`danger`.
+- **GET `/api/routes/shortest?from={id}&to={id}&mode={mode}`**
+  - `mode=fastest` (default) — minimiza distancia total.
+  - `mode=quickest` — minimiza tiempo total (`travelHours` + `logPoseHours` de islas intermedias).
+  - `mode=safest` — bottleneck min: minimiza el peligro **máximo** del camino.
+  - `mode=riskiest` — bottleneck max: maximiza el peligro **mínimo** del camino.
+- **GET `/api/routes/reachable?from={id}&maxCost={n}`** — islas alcanzables bajo presupuesto de distancia.
+
+Toda respuesta de `shortest` incluye:
+
+```jsonc
+{
+  "from": "windmill-village", "to": "wano", "mode": "quickest", "found": true, "hops": 14,
+  "totalDistance": 5850,        // suma de distance del camino
+  "totalTime": 591.67,          // travelHours + logPose de islas intermedias
+  "worstDanger": 5,             // max(danger) del camino
+  "bestDanger": 2,              // min(danger) del camino
+  "totalCost": 591.67,          // legacy: refleja la métrica del modo activo
+  "path": [
+    { "islandId": "windmill-village", "islandName": "Windmill Village",
+      "distanceSoFar": 0, "timeSoFar": 0, "worstDangerSoFar": 0, "bestDangerSoFar": 0, "costSoFar": 0 },
+    // … steps con métricas acumuladas
+  ]
+}
+```
+
+**Ejemplos curl:**
+
+```bash
+# La distancia más corta
+curl 'http://localhost:8080/api/routes/shortest?from=windmill-village&to=wano&mode=fastest' | jq
+
+# El menor tiempo total (penaliza Log Pose)
+curl 'http://localhost:8080/api/routes/shortest?from=windmill-village&to=wano&mode=quickest' | jq
+
+# La ruta que evita los peores tramos
+curl 'http://localhost:8080/api/routes/shortest?from=windmill-village&to=wano&mode=safest' | jq
+
+# La ruta que evita los tramos más fáciles (turismo de aventura)
+curl 'http://localhost:8080/api/routes/shortest?from=windmill-village&to=wano&mode=riskiest' | jq
+```
+
+Detalles algorítmicos: el modo `fastest`/`quickest` usa **Dijkstra clásico**; `safest`/`riskiest` usan **Dijkstra de cuello de botella** (bottleneck) reusando el mismo min-heap. Implementación en [pkg/graph/dijkstra.go](pkg/graph/dijkstra.go) y orquestación en [usecase/route_usecase.go](usecase/route_usecase.go).
+
+### Routes — Análisis del grafo (v3)
+
+Endpoint estructural pensado para auditoría y observabilidad del seed. Útil para verificar que el grafo está sano (un solo componente conexo) y que la distribución de `danger` es lo bastante diversa para que `safest` y `riskiest` diverjan de `fastest`.
+
+- **GET `/api/routes/stats`** — métricas globales del grafo. Cacheado 60s (`Cache-Control: public, max-age=60`).
+
+```jsonc
+{
+  "totalIslands": 32,
+  "totalRoutes": 48,
+  "bidirectionalCount": 41,         // rutas que se navegan en ambos sentidos
+  "islandsWithLogPose": 19,         // islas con logPoseHours > 0
+  "connectedComponents": 1,         // BFS no dirigido (bidi en ambos sentidos, uni solo en su sentido)
+  "largestComponent": 32,           // tamaño del componente más grande
+  "avgDistance": 478.42,
+  "avgTravelHours": 29.90,
+  "avgDanger": 3.02,
+  "dangerHistogram": [5, 12, 14, 11, 6]   // índice i = rutas con danger (i+1)
+}
+```
+
+```bash
+curl -s 'http://localhost:8080/api/routes/stats' | jq
+```
+
+Frontend: la vista [`/stats`](frontend/src/pages/StatsPage.tsx) renderiza estos datos como tarjetas + histograma de Danger.
+
+Auditoría adicional offline: `go run ./migration/cmd/audit` muestra distribuciones, componentes BFS y un sample aleatorio (seed 42) con tasa de divergencia entre los 4 modos.
+
 ### Health & Root
 
 - **GET `/health`**  

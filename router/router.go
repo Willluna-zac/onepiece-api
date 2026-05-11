@@ -10,7 +10,7 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
-func SetupRoutes(characterController *controller.CharacterController, islandController *controller.IslandController) http.Handler {
+func SetupRoutes(characterController *controller.CharacterController, islandController *controller.IslandController, routeController *controller.RouteController) http.Handler {
 	mux := http.NewServeMux()
 	imageProxy := controller.NewImageProxyController()
 
@@ -78,6 +78,28 @@ func SetupRoutes(characterController *controller.CharacterController, islandCont
 
 	mux.HandleFunc("/api/islands/", func(w http.ResponseWriter, r *http.Request) {
 		islandController.GetIslandByID(w, r)
+	})
+
+	// Routes — rutas marítimas y navegación con Dijkstra
+	// Orden: específicas antes del wildcard /from/
+	mux.HandleFunc("/api/routes", func(w http.ResponseWriter, r *http.Request) {
+		routeController.GetAllRoutes(w, r)
+	})
+
+	mux.HandleFunc("/api/routes/shortest", func(w http.ResponseWriter, r *http.Request) {
+		routeController.GetShortestPath(w, r)
+	})
+
+	mux.HandleFunc("/api/routes/reachable", func(w http.ResponseWriter, r *http.Request) {
+		routeController.GetReachableIslands(w, r)
+	})
+
+	mux.HandleFunc("/api/routes/stats", func(w http.ResponseWriter, r *http.Request) {
+		routeController.GetGraphStats(w, r)
+	})
+
+	mux.HandleFunc("/api/routes/from/", func(w http.ResponseWriter, r *http.Request) {
+		routeController.GetRoutesFromIsland(w, r)
 	})
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
